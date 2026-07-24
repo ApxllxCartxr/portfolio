@@ -157,16 +157,25 @@
 
 <style>
 	.bento {
-		display: flex;
-		flex-direction: column;
-		gap: 1.35rem;
+		display: grid;
+		grid-template-columns: 1.4fr 1fr;
+		gap: 1.1rem;
 	}
 
 	.card {
 		background: var(--sheet);
 		border: 1px solid var(--rule);
 		border-radius: 14px;
-		padding: 1.75rem;
+		padding: 1.5rem;
+	}
+	.card--header {
+		grid-column: 1 / -1;
+	}
+	.card--exp {
+		grid-column: 1;
+	}
+	.card--edu-skills {
+		grid-column: 2;
 	}
 
 	.rule {
@@ -175,7 +184,11 @@
 		background: var(--rule);
 	}
 	.rule--minor {
+		grid-column: 1 / -1;
 		width: 30%;
+	}
+	.foot {
+		grid-column: 1 / -1;
 	}
 
 	/* ---------- header card ---------- */
@@ -409,6 +422,13 @@
 
 	/* ---------- responsive ---------- */
 	@media (max-width: 900px) {
+		.bento {
+			grid-template-columns: 1fr;
+		}
+		.card--exp,
+		.card--edu-skills {
+			grid-column: 1;
+		}
 		.card {
 			padding: 1.25rem;
 		}
