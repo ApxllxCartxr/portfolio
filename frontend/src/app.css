@@ -80,52 +80,52 @@
 
 /* ============================================================
    THEME TOKENS — the one place to change colours.
-   `:root` = light (cream sheet) · `[data-theme='dark']` = dark sheet.
-   Muted Persian blue (#2E48AA) is the single blue in both themes.
+   `:root` = light (slate-white sheet) · `[data-theme='dark']` = dark sheet.
+   Deep violet (#32127A) is the single accent in both themes.
    ============================================================ */
 :root,
 :root[data-theme='light'] {
 	color-scheme: light;
 
-	--bg: #e4e3d5; /* page (grid shows here) */
-	--sheet: #efeee3; /* the resume sheet */
-	--text: #17160f;
-	--muted: #5b584b;
-	--faint: #6b6857;
+	--bg: #e9ebee; /* page (grid shows here) */
+	--sheet: #f5f6f8; /* the resume sheet */
+	--text: #20242b;
+	--muted: #5c6570;
+	--faint: #767f89;
 
-	--blue: #2e48aa; /* muted Persian blue */
-	--blue-fg: #f1f0e6; /* text on blue */
-	--red: #b5382b; /* warm accent (AA on cream) */
+	--accent: #32127a; /* deep violet */
+	--accent-fg: #f4f1fb; /* text on accent */
+	--red: #b5382b; /* warm accent (AA on light) */
 
-	--name: var(--blue); /* big name colour */
-	--rule: rgba(46, 72, 170, 0.42); /* hairline section rules */
-	--pill-border: rgba(46, 72, 170, 0.5);
-	--pill-text: #2e48aa;
+	--name: var(--accent); /* big name colour */
+	--rule: rgba(50, 18, 122, 0.42); /* hairline section rules */
+	--pill-border: rgba(50, 18, 122, 0.5);
+	--pill-text: #32127a;
 
-	--grid-line: rgba(46, 72, 170, 0.07);
-	--grid-plus: rgba(46, 72, 170, 0.32);
+	--grid-line: rgba(50, 18, 122, 0.07);
+	--grid-plus: rgba(50, 18, 122, 0.32);
 }
 
 :root[data-theme='dark'] {
 	color-scheme: dark;
 
-	--bg: #08080a;
-	--sheet: #101013;
-	--text: #ecebe6;
-	--muted: #9c9b92;
-	--faint: #8b8a80;
+	--bg: #15171b;
+	--sheet: #1c1f24;
+	--text: #e8eaed;
+	--muted: #9aa1ab;
+	--faint: #7e8590;
 
-	--blue: #2e48aa; /* muted Persian blue, same as light theme */
-	--blue-fg: #f1f0e6;
+	--accent: #32127a; /* same fill in both themes — light text on it stays legible */
+	--accent-fg: #f4f1fb;
 	--red: #e0685c; /* lighter red for AA on dark */
 
-	--name: var(--text); /* Persian blue fails on black → use fg */
-	--rule: rgba(120, 137, 240, 0.42); /* lightened Persian blue, visible on dark */
-	--pill-border: rgba(120, 137, 240, 0.55);
-	--pill-text: #9aa7f2; /* lightened Persian blue, AA on dark sheet */
+	--name: var(--text); /* deep violet fails on near-black → use fg */
+	--rule: rgba(185, 166, 232, 0.42); /* lightened violet, visible on dark */
+	--pill-border: rgba(185, 166, 232, 0.55);
+	--pill-text: #b9a6e8; /* lightened violet, AA on dark sheet */
 
-	--grid-line: rgba(120, 137, 240, 0.07);
-	--grid-plus: rgba(236, 235, 230, 0.42);
+	--grid-line: rgba(185, 166, 232, 0.07);
+	--grid-plus: rgba(185, 166, 232, 0.42);
 }
 
 html {
@@ -141,8 +141,8 @@ body {
 }
 
 ::selection {
-	background: var(--blue);
-	color: var(--blue-fg);
+	background: var(--accent);
+	color: var(--accent-fg);
 }
 
 a {
@@ -150,7 +150,7 @@ a {
 }
 
 :focus-visible {
-	outline: 2px solid var(--blue);
+	outline: 2px solid var(--accent);
 	outline-offset: 2px;
 	border-radius: 2px;
 }

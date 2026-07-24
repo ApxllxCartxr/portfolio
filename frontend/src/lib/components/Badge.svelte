@@ -13,9 +13,9 @@
 	.badge {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.32rem 0.7rem;
-		border-radius: 7px;
-		font-size: 0.92rem;
+		padding: 0.22rem 0.55rem;
+		border-radius: 6px;
+		font-size: 0.82rem;
 		font-weight: 500;
 		line-height: 1;
 		white-space: nowrap;
@@ -30,8 +30,8 @@
 	}
 
 	.badge--invert {
-		color: var(--blue-fg);
-		background: var(--blue);
+		color: var(--accent-fg);
+		background: var(--accent);
 		border-color: transparent;
 	}
 </style>
