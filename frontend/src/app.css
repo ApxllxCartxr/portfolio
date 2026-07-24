@@ -1,0 +1,165 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   Fonts — self-hosted, subsetted to woff2 (see /static/fonts)
+   Roles:  Redaction 50 → left card · Redaction 35 → main name
+           Libre Caslon Condensed → titles · Open Sauce Sans → body
+   ============================================================ */
+@font-face {
+	font-family: 'Redaction 50';
+	src: url('/fonts/Redaction50-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Redaction 35';
+	src: url('/fonts/Redaction35-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Redaction 35';
+	src: url('/fonts/Redaction35-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Libre Caslon Condensed';
+	src: url('/fonts/LibreCaslonCondensed-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Libre Caslon Condensed';
+	src: url('/fonts/LibreCaslonCondensed-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Libre Caslon Condensed';
+	src: url('/fonts/LibreCaslonCondensed-Bold.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Open Sauce Sans';
+	src: url('/fonts/OpenSauceSans-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Open Sauce Sans';
+	src: url('/fonts/OpenSauceSans-Medium.woff2') format('woff2');
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'Open Sauce Sans';
+	src: url('/fonts/OpenSauceSans-SemiBold.woff2') format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@theme {
+	--font-display: 'Redaction 35', Georgia, serif; /* main name */
+	--font-redaction50: 'Redaction 50', Georgia, serif; /* left card */
+	--font-title: 'Libre Caslon Condensed', Georgia, serif; /* headings / titles */
+	--font-body: 'Open Sauce Sans', ui-sans-serif, system-ui, sans-serif; /* body */
+}
+
+/* ============================================================
+   THEME TOKENS — the one place to change colours.
+   `:root` = light (cream sheet) · `[data-theme='dark']` = dark sheet.
+   Persian blue (#1C39BB) is the single blue in both themes.
+   ============================================================ */
+:root,
+:root[data-theme='light'] {
+	color-scheme: light;
+
+	--bg: #e4e3d5; /* page (grid shows here) */
+	--sheet: #efeee3; /* the resume sheet */
+	--text: #17160f;
+	--muted: #5b584b;
+	--faint: #6b6857;
+
+	--blue: #1c39bb; /* Persian blue */
+	--blue-fg: #f1f0e6; /* text on blue */
+	--red: #b5382b; /* warm accent (AA on cream) */
+
+	--name: var(--blue); /* big name colour */
+	--rule: rgba(28, 57, 187, 0.42); /* hairline section rules */
+	--pill-border: rgba(28, 57, 187, 0.5);
+	--pill-text: #1c39bb;
+
+	--grid-line: rgba(28, 57, 187, 0.07);
+	--grid-plus: rgba(28, 57, 187, 0.32);
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+
+	--bg: #08080a;
+	--sheet: #101013;
+	--text: #ecebe6;
+	--muted: #9c9b92;
+	--faint: #8b8a80;
+
+	--blue: #1c39bb;
+	--blue-fg: #f1f0e6;
+	--red: #e0685c; /* lighter red for AA on dark */
+
+	--name: var(--text); /* Persian blue fails on black → use fg */
+	--rule: rgba(120, 137, 240, 0.42); /* lightened Persian blue, visible on dark */
+	--pill-border: rgba(120, 137, 240, 0.55);
+	--pill-text: #9aa7f2; /* lightened Persian blue, AA on dark sheet */
+
+	--grid-line: rgba(120, 137, 240, 0.07);
+	--grid-plus: rgba(236, 235, 230, 0.42);
+}
+
+html {
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font-body);
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+}
+
+body {
+	min-height: 100dvh;
+}
+
+::selection {
+	background: var(--blue);
+	color: var(--blue-fg);
+}
+
+a {
+	color: inherit;
+}
+
+:focus-visible {
+	outline: 2px solid var(--blue);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		transition-duration: 0.001ms !important;
+	}
+}
