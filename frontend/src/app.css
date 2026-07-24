@@ -81,7 +81,7 @@
 /* ============================================================
    THEME TOKENS — the one place to change colours.
    `:root` = light (cream sheet) · `[data-theme='dark']` = dark sheet.
-   Persian blue (#1C39BB) is the single blue in both themes.
+   Muted Persian blue (#2E48AA) is the single blue in both themes.
    ============================================================ */
 :root,
 :root[data-theme='light'] {
@@ -93,17 +93,17 @@
 	--muted: #5b584b;
 	--faint: #6b6857;
 
-	--blue: #1c39bb; /* Persian blue */
+	--blue: #2e48aa; /* muted Persian blue */
 	--blue-fg: #f1f0e6; /* text on blue */
 	--red: #b5382b; /* warm accent (AA on cream) */
 
 	--name: var(--blue); /* big name colour */
-	--rule: rgba(28, 57, 187, 0.42); /* hairline section rules */
-	--pill-border: rgba(28, 57, 187, 0.5);
-	--pill-text: #1c39bb;
+	--rule: rgba(46, 72, 170, 0.42); /* hairline section rules */
+	--pill-border: rgba(46, 72, 170, 0.5);
+	--pill-text: #2e48aa;
 
-	--grid-line: rgba(28, 57, 187, 0.07);
-	--grid-plus: rgba(28, 57, 187, 0.32);
+	--grid-line: rgba(46, 72, 170, 0.07);
+	--grid-plus: rgba(46, 72, 170, 0.32);
 }
 
 :root[data-theme='dark'] {
@@ -115,7 +115,7 @@
 	--muted: #9c9b92;
 	--faint: #8b8a80;
 
-	--blue: #1c39bb;
+	--blue: #2e48aa; /* muted Persian blue, same as light theme */
 	--blue-fg: #f1f0e6;
 	--red: #e0685c; /* lighter red for AA on dark */
 

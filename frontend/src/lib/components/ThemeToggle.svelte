@@ -61,10 +61,7 @@
 
 <style>
 	.toggle {
-		position: fixed;
-		top: 1rem;
-		right: 1rem;
-		z-index: 10;
+		flex: none;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -72,16 +69,15 @@
 		height: 2.4rem;
 		border-radius: 999px;
 		color: var(--text);
-		background: color-mix(in srgb, var(--sheet) 82%, transparent);
+		background: transparent;
 		border: 1px solid var(--rule);
-		backdrop-filter: blur(8px);
 		cursor: pointer;
 		transition:
 			background 0.15s ease,
 			transform 0.15s ease;
 	}
 	.toggle:hover {
-		background: var(--sheet);
+		background: color-mix(in srgb, var(--rule) 20%, transparent);
 		transform: translateY(-1px);
 	}
 </style>

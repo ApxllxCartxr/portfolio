@@ -2,40 +2,25 @@
 	import { profile, contacts, experience, projects, education, focus, skills } from '$lib/resume';
 	import Badge from './Badge.svelte';
 	import Icon from './Icon.svelte';
+	import ThemeToggle from './ThemeToggle.svelte';
+
+	const year = new Date().getFullYear();
 </script>
 
 <article class="sheet">
 	<span class="rule"></span>
 
 	<header class="head">
-		<h1 class="name">{profile.name}<span class="mark">*</span></h1>
+		<div class="name-row">
+			<h1 class="name">{profile.name}<span class="mark">*</span></h1>
+			<ThemeToggle />
+		</div>
 		<p class="intro">
 			<strong>{profile.lead}</strong>
 			{profile.intro}
 			<span class="cta">{profile.cta}</span>
 		</p>
 	</header>
-
-	<span class="rule"></span>
-
-	<section class="row row--badges">
-		<div class="col">
-			<span class="label">Skills</span>
-			<div class="pills">
-				{#each skills as s (s)}
-					<Badge label={s} />
-				{/each}
-			</div>
-		</div>
-		<div class="col">
-			<span class="label">Focus</span>
-			<div class="pills">
-				{#each focus as f (f)}
-					<Badge label={f} invert />
-				{/each}
-			</div>
-		</div>
-	</section>
 
 	<span class="rule"></span>
 
@@ -46,7 +31,10 @@
 				<div class="entry">
 					<div class="entry__meta">{job.period}</div>
 					<div class="entry__title">
-						<span class="tt">{job.company}</span>
+						<span class="tt"
+							><span class="entry-icon"><Icon name="briefcase" size={14} /></span
+							>{job.company}</span
+						>
 						<span class="ts">{job.role}</span>
 						<span class="ts">{job.location}</span>
 					</div>
@@ -59,7 +47,9 @@
 				<div class="entry">
 					<div class="entry__meta">{p.stack}</div>
 					<div class="entry__title">
-						<span class="tt">{p.name}</span>
+						<span class="tt"
+							><span class="entry-icon"><Icon name="code" size={14} /></span>{p.name}</span
+						>
 						<span class="ts">{p.tagline}</span>
 					</div>
 					<p class="entry__desc">{p.summary}</p>
@@ -100,10 +90,37 @@
 
 	<span class="rule"></span>
 
+	<section class="row row--badges">
+		<div class="col">
+			<span class="label">Skills</span>
+			<div class="skill-groups">
+				{#each skills as group (group.category)}
+					<div class="skill-group">
+						<span class="skill-group__label">{group.category}/</span>
+						<div class="pills">
+							{#each group.items as s (s)}
+								<Badge label={s} />
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</div>
+		<div class="col">
+			<span class="label">Focus</span>
+			<div class="pills">
+				{#each focus as f (f)}
+					<Badge label={f} invert />
+				{/each}
+			</div>
+		</div>
+	</section>
+
+	<span class="rule rule--minor"></span>
+
 	<footer class="foot">
-		<span>{profile.fullName}</span>
-		<span>Résumé</span>
-		<span>2026</span>
+		<span>Designed &amp; built by {profile.fullName}</span>
+		<span>{year}</span>
 	</footer>
 </article>
 
@@ -124,6 +141,10 @@
 		background: var(--rule);
 		flex: none;
 	}
+	.rule--minor {
+		align-self: flex-start;
+		width: 30%;
+	}
 
 	/* ---------- header ---------- */
 	.head {
@@ -131,6 +152,12 @@
 		grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
 		gap: clamp(1rem, 3vw, 3rem);
 		align-items: start;
+	}
+	.name-row {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 0.75rem;
 	}
 	.name {
 		font-family: var(--font-display);
@@ -199,6 +226,26 @@
 		gap: 0.45rem;
 	}
 
+	.skill-groups {
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+	.skill-group {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.15rem 0.55rem;
+	}
+	.skill-group__label {
+		flex: none;
+		min-width: 5.2rem;
+		font-family: var(--font-title);
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--muted);
+	}
+
 	/* ---------- entries ---------- */
 	.entry {
 		display: grid;
@@ -235,10 +282,18 @@
 		line-height: 1.2;
 	}
 	.tt {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
 		font-family: var(--font-title);
 		font-weight: 700;
 		font-size: 1.1rem;
 		color: var(--text);
+	}
+	.entry-icon {
+		display: inline-flex;
+		flex: none;
+		color: var(--muted);
 	}
 	.ts {
 		font-size: 0.82rem;

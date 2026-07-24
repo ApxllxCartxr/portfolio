@@ -22,7 +22,11 @@
 		color: var(--pill-text);
 		background: transparent;
 		border: 1px solid var(--pill-border);
+		transition: background 0.15s ease;
 		/* deliberately no shadow / no glow */
+	}
+	.badge:not(.badge--invert):hover {
+		background: color-mix(in srgb, var(--pill-border) 16%, transparent);
 	}
 
 	.badge--invert {

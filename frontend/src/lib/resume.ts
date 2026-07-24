@@ -2,7 +2,7 @@
 // Transcribed from /docs/resume.md; descriptions kept concise for a one-screen,
 // high-readability layout.
 
-export type IconName = 'mail' | 'git' | 'phone';
+export type IconName = 'mail' | 'git' | 'phone' | 'briefcase' | 'code';
 
 export interface Contact {
 	label: string;
@@ -32,6 +32,11 @@ export interface Education {
 	location: string;
 	period: string;
 	summary: string;
+}
+
+export interface SkillGroup {
+	category: string;
+	items: string[];
 }
 
 export const profile = {
@@ -115,24 +120,13 @@ export const education: Education = {
 		'7.85 CGPA · President, ED-Cell (CITIL) — led 35 members, ran workshops for 300+, raised ₹30,000.'
 };
 
-// Skills — flat Persian-blue outlined pills (no icons needed in the sheet look).
-export const skills: string[] = [
-	'Python',
-	'JavaScript',
-	'React.js',
-	'Next.js',
-	'Node.js',
-	'Express.js',
-	'Django',
-	'Flask',
-	'Go',
-	'Flutter',
-	'Firebase',
-	'PostgreSQL',
-	'MongoDB',
-	'SQLite',
-	'REST APIs',
-	'AI Engineering',
-	'Prompt Engineering',
-	'Git'
+// Skills — grouped by capability, rendered as Persian-blue outlined pills under
+// a "folder" category label (no icons needed in the sheet look).
+export const skills: SkillGroup[] = [
+	{ category: 'Languages', items: ['Python', 'JavaScript', 'Go'] },
+	{ category: 'Frontend', items: ['React.js', 'Next.js', 'Flutter'] },
+	{ category: 'Backend', items: ['Node.js', 'Express.js', 'Django', 'Flask', 'REST APIs'] },
+	{ category: 'Data', items: ['PostgreSQL', 'MongoDB', 'SQLite', 'Firebase'] },
+	{ category: 'AI', items: ['AI Engineering', 'Prompt Engineering'] },
+	{ category: 'Tools', items: ['Git'] }
 ];
