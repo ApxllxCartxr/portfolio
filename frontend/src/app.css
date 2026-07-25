@@ -71,66 +71,89 @@
 	font-display: swap;
 }
 
+@font-face {
+	font-family: 'Belmonte Ballpoint';
+	src: url('/fonts/BelmonteBallpoint-Regular.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Plain 'Redaction' — the unnumbered base cut of the Redaction family. The
+   numbered cuts (35, 50, ...) get progressively more distressed/obscured;
+   this is the clearest one available (there is no "Redaction 0"). */
+@font-face {
+	font-family: 'Redaction';
+	src: url('/fonts/Redaction-Bold.otf') format('opentype');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
 @theme {
 	--font-display: 'Redaction 35', Georgia, serif; /* main name */
 	--font-redaction50: 'Redaction 50', Georgia, serif; /* left card */
+	--font-redaction-clear: 'Redaction', Georgia, serif; /* clearest cut — accent glyphs */
 	--font-title: 'Libre Caslon Condensed', Georgia, serif; /* headings / titles */
 	--font-body: 'Open Sauce Sans', ui-sans-serif, system-ui, sans-serif; /* body */
+	--font-hand: 'Belmonte Ballpoint', cursive; /* handwritten intro line */
+	/* No monospace face ships in the font pack — system stack only. */
+	--font-mono:
+		ui-monospace, 'SF Mono', 'Cascadia Code', 'Fira Code', Menlo, Consolas, 'Liberation Mono',
+		monospace;
 }
 
 /* ============================================================
-   THEME TOKENS — the one place to change colours.
-   `:root` = light (cream sheet) · `[data-theme='dark']` = dark sheet.
-   Persian blue (#1C39BB) is the single blue in both themes.
+   THEME TOKENS — three interchangeable two-colour themes.
+   Each theme is a --c1/--c2 pair; [data-swap='true'] exchanges
+   which one is --bg and which is --fg. --accent-c1/--accent-c2
+   follow the same swap so the name-card asterisk always has a
+   colour that reads against whichever slot is currently --bg.
+   Everything else (grid lines, focus ring) derives from --fg.
    ============================================================ */
 :root,
-:root[data-theme='light'] {
-	color-scheme: light;
-
-	--bg: #e4e3d5; /* page (grid shows here) */
-	--sheet: #efeee3; /* the resume sheet */
-	--text: #17160f;
-	--muted: #5b584b;
-	--faint: #6b6857;
-
-	--blue: #1c39bb; /* Persian blue */
-	--blue-fg: #f1f0e6; /* text on blue */
-	--red: #b5382b; /* warm accent (AA on cream) */
-
-	--name: var(--blue); /* big name colour */
-	--rule: rgba(28, 57, 187, 0.42); /* hairline section rules */
-	--pill-border: rgba(28, 57, 187, 0.5);
-	--pill-text: #1c39bb;
-
-	--grid-line: rgba(28, 57, 187, 0.07);
-	--grid-plus: rgba(28, 57, 187, 0.32);
+:root[data-theme='milk-sea'] {
+	--c1: #f4f1ec;
+	--c2: #191265;
+	--accent-c1: #c1440e; /* rust — reads on the pale bg */
+	--accent-c2: #ffa500; /* amber — reads on the blue bg */
 }
 
-:root[data-theme='dark'] {
-	color-scheme: dark;
+:root[data-theme='arch-paper'] {
+	--c1: #076c45;
+	--c2: #f4f1ec;
+	--accent-c1: #ffa500; /* amber — reads on the green bg */
+	--accent-c2: #c1440e; /* rust — reads on the pale bg */
+}
 
-	--bg: #08080a;
-	--sheet: #101013;
-	--text: #ecebe6;
-	--muted: #9c9b92;
-	--faint: #8b8a80;
+:root[data-theme='straw-berry'] {
+	--c1: #f4f1ec;
+	--c2: #990011;
+	--accent-c1: #c2185b; /* deep pink — reads on the pale bg */
+	--accent-c2: #ff8fb3; /* light pink — reads on the red bg */
+}
 
-	--blue: #1c39bb;
-	--blue-fg: #f1f0e6;
-	--red: #e0685c; /* lighter red for AA on dark */
+:root {
+	--bg: var(--c1);
+	--fg: var(--c2);
+	--accent: var(--accent-c1);
+}
 
-	--name: var(--text); /* Persian blue fails on black → use fg */
-	--rule: rgba(120, 137, 240, 0.42); /* lightened Persian blue, visible on dark */
-	--pill-border: rgba(120, 137, 240, 0.55);
-	--pill-text: #9aa7f2; /* lightened Persian blue, AA on dark sheet */
+:root[data-swap='true'] {
+	--bg: var(--c2);
+	--fg: var(--c1);
+	--accent: var(--accent-c2);
+}
 
-	--grid-line: rgba(120, 137, 240, 0.07);
-	--grid-plus: rgba(236, 235, 230, 0.42);
+/* Derived tokens — always in terms of --bg/--fg, never a literal colour. */
+:root {
+	--grid-line: color-mix(in srgb, var(--fg) 45%, transparent);
+	--focus-ring: var(--fg);
 }
 
 html {
 	background: var(--bg);
-	color: var(--text);
+	color: var(--fg);
 	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
@@ -141,8 +164,8 @@ body {
 }
 
 ::selection {
-	background: var(--blue);
-	color: var(--blue-fg);
+	background: var(--fg);
+	color: var(--bg);
 }
 
 a {
@@ -150,7 +173,7 @@ a {
 }
 
 :focus-visible {
-	outline: 2px solid var(--blue);
+	outline: 2px solid var(--focus-ring);
 	outline-offset: 2px;
 	border-radius: 2px;
 }
