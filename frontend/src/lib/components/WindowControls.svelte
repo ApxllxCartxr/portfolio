@@ -32,17 +32,17 @@
 <style>
 	.controls {
 		display: flex;
-		gap: 0.55rem;
+		gap: 0.7rem;
 		margin-left: auto;
 	}
 
 	.btn {
-		width: 0.9rem;
-		height: 0.9rem;
+		width: 1.3rem;
+		height: 1.3rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		border: none;
+		border: 1.5px solid transparent;
 		background: none;
 		color: var(--bg);
 		padding: 0;
@@ -50,7 +50,7 @@
 	}
 
 	.btn:disabled {
-		opacity: 0.45;
+		opacity: 0.5;
 	}
 
 	.btn--close {
@@ -59,7 +59,8 @@
 
 	.btn--close:hover,
 	.btn--close:focus-visible {
-		opacity: 0.6;
+		background: var(--bg);
+		color: var(--fg);
 	}
 
 	.btn:focus-visible {
@@ -69,21 +70,22 @@
 
 	.glyph {
 		font-family: var(--font-mono);
-		font-size: 0.7rem;
+		font-size: 0.95rem;
+		font-weight: 700;
 	}
 
 	.glyph--minimize {
-		width: 0.5rem;
-		height: 1px;
+		width: 0.7rem;
+		height: 2.5px;
 		background: currentColor;
 		align-self: flex-end;
-		margin-bottom: 1px;
+		margin-bottom: 2px;
 	}
 
 	.glyph--maximize {
-		width: 0.5rem;
-		height: 0.5rem;
-		border: 1px solid currentColor;
+		width: 0.7rem;
+		height: 0.7rem;
+		border: 2px solid currentColor;
 	}
 
 	.glyph--close {

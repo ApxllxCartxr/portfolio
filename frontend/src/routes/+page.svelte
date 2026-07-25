@@ -74,6 +74,8 @@
 					zIndex={zIndexOf('center')}
 					onClose={() => closeWindow('center')}
 					onFront={() => bringToFront('center')}
+					size="primary"
+					scrollCue
 				>
 					<CenterCard />
 				</Window>

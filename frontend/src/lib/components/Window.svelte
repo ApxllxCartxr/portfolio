@@ -19,13 +19,29 @@
 		zIndex: number;
 		onClose: () => void;
 		onFront: () => void;
+		size?: 'primary' | 'compact';
+		scrollCue?: boolean;
 		children?: Snippet;
 	}
 
-	let { title, x, y, order = 0, boundsEl, zIndex, onClose, onFront, children }: Props = $props();
+	let {
+		title,
+		x,
+		y,
+		order = 0,
+		boundsEl,
+		zIndex,
+		onClose,
+		onFront,
+		size = 'compact',
+		scrollCue = false,
+		children
+	}: Props = $props();
 
 	let windowEl = $state<HTMLElement>();
 	let titlebarEl = $state<HTMLElement>();
+	let contentEl = $state<HTMLElement>();
+	let canScrollMore = $state(false);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,6 +93,28 @@
 		draggable?.kill();
 	});
 
+	// Overflow-aware scroll cue: only relevant when `scrollCue` is set (the
+	// center window), and only visible once content actually exceeds the
+	// scrollable area — a static hint would be misleading on short content.
+	$effect(() => {
+		if (!scrollCue || !browser || !contentEl) return;
+		const el = contentEl;
+
+		const update = () => {
+			canScrollMore = el.scrollHeight - el.clientHeight - el.scrollTop > 4;
+		};
+		update();
+
+		el.addEventListener('scroll', update);
+		const resizeObserver = new ResizeObserver(update);
+		resizeObserver.observe(el);
+
+		return () => {
+			el.removeEventListener('scroll', update);
+			resizeObserver.disconnect();
+		};
+	});
+
 	function nudge(dx: number, dy: number) {
 		if (!draggable || !gsapRef || !windowEl) return;
 		const nx = (draggable.x ?? 0) + dx;
@@ -107,7 +145,7 @@
 	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<section
-		class="window"
+		class="window {size}"
 		bind:this={windowEl}
 		aria-label={title}
 		tabindex="0"
@@ -117,9 +155,14 @@
 		<header class="titlebar" bind:this={titlebarEl}>
 			<WindowControls {title} {onClose} />
 		</header>
-		<div class="content">
+		<div class="content" class:scrollable={scrollCue} bind:this={contentEl}>
 			{@render children?.()}
 		</div>
+		{#if scrollCue && canScrollMore}
+			<div class="scroll-cue" aria-hidden="true">
+				<span class="chevron">⌄</span>
+			</div>
+		{/if}
 	</section>
 </div>
 
@@ -130,9 +173,18 @@
 	}
 
 	.window {
+		position: relative;
 		background: var(--bg);
 		border: 1px solid var(--fg);
 		width: min(420px, 85vw);
+	}
+
+	.window.primary {
+		width: min(600px, 92vw);
+	}
+
+	.window.compact {
+		width: min(280px, 75vw);
 	}
 
 	.titlebar {
@@ -153,6 +205,52 @@
 		padding: 0.9rem;
 	}
 
+	.content.scrollable {
+		max-height: min(52vh, 420px);
+		overflow-y: auto;
+	}
+
+	.scroll-cue {
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		justify-content: center;
+		padding: 1.4rem 0 0.3rem;
+		background: linear-gradient(to bottom, transparent, var(--bg) 65%);
+		pointer-events: none;
+	}
+
+	.chevron {
+		font-family: var(--font-mono);
+		font-size: 0.9rem;
+		line-height: 1;
+		color: var(--fg);
+		animation: bob 1.4s ease-in-out infinite;
+	}
+
+	@keyframes bob {
+		0%,
+		100% {
+			transform: translateY(0);
+			opacity: 0.55;
+		}
+		50% {
+			transform: translateY(3px);
+			opacity: 1;
+		}
+	}
+
+	@media (min-width: 701px) {
+		.window.compact .content {
+			min-height: 11rem;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+		}
+	}
+
 	@media (max-width: 700px) {
 		.anchor {
 			position: static;
@@ -162,13 +260,21 @@
 			z-index: auto !important;
 		}
 
-		.window {
+		.window,
+		.window.primary,
+		.window.compact {
 			width: 100%;
 			margin-bottom: 1rem;
 		}
 
 		.titlebar {
 			cursor: default;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.chevron {
+			animation: none;
 		}
 	}
 </style>
