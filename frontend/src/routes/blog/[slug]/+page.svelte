@@ -12,7 +12,11 @@
 </svelte:head>
 
 <main class="wrap">
-	<a class="back" href={resolve('/blog')}>&larr; Blog</a>
+	<nav class="breadcrumb" aria-label="Breadcrumb">
+		<a href={resolve('/')}>Home</a>
+		<span aria-hidden="true">/</span>
+		<a href={resolve('/blog')}>Blog</a>
+	</nav>
 
 	<h1>{data.post.title}</h1>
 	<time datetime={data.post.created_at}
@@ -37,14 +41,28 @@
 		color: var(--fg);
 	}
 
-	.back {
-		display: inline-block;
+	.breadcrumb {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
 		font-family: var(--font-mono);
 		font-size: 0.8rem;
+		margin-bottom: 2rem;
+	}
+
+	.breadcrumb span {
+		opacity: 0.5;
+	}
+
+	.breadcrumb a {
 		color: inherit;
 		text-decoration: underline;
 		text-underline-offset: 3px;
-		margin-bottom: 2rem;
+	}
+
+	.breadcrumb a:hover,
+	.breadcrumb a:focus-visible {
+		color: var(--accent);
 	}
 
 	h1 {

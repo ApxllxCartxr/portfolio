@@ -10,6 +10,8 @@
 </svelte:head>
 
 <main class="wrap">
+	<a class="back" href={resolve('/')}>&larr; Home</a>
+
 	<h1>Blog</h1>
 
 	{#if data.posts.length === 0}
@@ -41,6 +43,21 @@
 		margin: 0 auto;
 		padding: 3rem 1.25rem 5rem;
 		color: var(--fg);
+	}
+
+	.back {
+		display: inline-block;
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		margin-bottom: 2rem;
+	}
+
+	.back:hover,
+	.back:focus-visible {
+		color: var(--accent);
 	}
 
 	h1 {
