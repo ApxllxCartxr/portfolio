@@ -47,6 +47,8 @@
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let draggable: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let lenisRef: any;
 
 	export function snapToCenter() {
 		if (!draggable || !gsapRef || !windowEl) return;
@@ -108,6 +110,42 @@
 		draggable?.kill();
 	});
 
+	// Lenis smooths the maximized window's own content scroll (Experience/
+	// Projects/Skills) — its standard use case, a genuine scrollable
+	// container. Scoped to `contentEl` only, so it never competes with
+	// +page.svelte's separate wheel handling that drives the maximize itself.
+	$effect(() => {
+		if (!browser || !maximized || !contentEl) return;
+		let cancelled = false;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let tickerFn: any;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let localGsap: any;
+
+		(async () => {
+			const [{ default: Lenis }, { gsap }] = await Promise.all([import('lenis'), import('gsap')]);
+			if (cancelled || !contentEl) return;
+
+			localGsap = gsap;
+			const inner = contentEl.querySelector<HTMLElement>('.content-inner');
+			lenisRef = new Lenis({
+				wrapper: contentEl,
+				content: inner ?? contentEl,
+				duration: 1.1,
+				smoothWheel: true
+			});
+			tickerFn = (time: number) => lenisRef?.raf(time * 1000);
+			gsap.ticker.add(tickerFn);
+		})();
+
+		return () => {
+			cancelled = true;
+			if (tickerFn) localGsap?.ticker.remove(tickerFn);
+			lenisRef?.destroy();
+			lenisRef = undefined;
+		};
+	});
+
 	function nudge(dx: number, dy: number) {
 		if (!draggable || !gsapRef || !windowEl) return;
 		const nx = (draggable.x ?? 0) + dx;
@@ -150,7 +188,12 @@
 			<WindowControls {title} {onClose} />
 		</header>
 		<div class="content" bind:this={contentEl}>
-			{@render children?.()}
+			<!-- Single wrapper so Lenis (below) has one content element to
+			     measure the real scroll height against — `children` can render
+			     multiple sibling roots (e.g. CenterCard + ResumeSection). -->
+			<div class="content-inner">
+				{@render children?.()}
+			</div>
 		</div>
 	</section>
 </div>
@@ -164,7 +207,9 @@
 	.window {
 		position: relative;
 		background: var(--bg);
-		border: 1px solid var(--fg);
+		/* --win-chrome fades this border to flat --bg while maximizing (driven
+		   from +page.svelte), so the card reads as part of the background. */
+		border: 1px solid color-mix(in srgb, var(--fg) calc(var(--win-chrome, 1) * 100%), transparent);
 		width: min(420px, 85vw);
 	}
 
@@ -206,6 +251,11 @@
 		justify-content: safe center;
 		overflow-y: auto;
 		max-height: none;
+		scrollbar-width: none;
+	}
+
+	.window.maximized .content::-webkit-scrollbar {
+		display: none;
 	}
 
 	@media (min-width: 701px) {

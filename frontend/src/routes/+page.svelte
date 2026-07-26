@@ -55,20 +55,24 @@
 	// window into a centered portrait card (not edge-to-edge fullscreen);
 	// wheeling up — once the window's own content is scrolled back to its
 	// top — shrinks it back. The page itself never scrolls; scrolling only
-	// ever drives this progress value or the center window's own internal
-	// content once maximized.
-	let progress = 0;
+	// ever drives a target progress value, which a GSAP tween eases into an
+	// actual rendered value every frame (fluid motion instead of a per-tick
+	// snap), or the center window's own internal content once maximized.
+	let target = 0;
+	const driver = { p: 0 };
 	let startRect: DOMRect | null = null;
 	let growEls: { el: HTMLElement; startPx: number }[] | null = null;
 	let gridEl: HTMLElement | null = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let smoothTween: any;
 
 	function clamp01(v: number) {
 		return Math.max(0, Math.min(1, v));
 	}
 
-	function applyProgress(p: number) {
+	function render(p: number) {
 		if (!gsapRef || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
 		const anchorEl = centerWindowEl.parentElement as HTMLElement | null;
 		const fade = 1 - Math.min(p / 0.3, 1);
@@ -78,6 +82,7 @@
 			if (anchorEl) anchorEl.style.transform = '';
 			if (growEls) for (const { el } of growEls) el.style.fontSize = '';
 			desktopEl?.style.removeProperty('--chrome');
+			centerWindowEl.style.removeProperty('--win-chrome');
 			centerWindowInstance?.setDraggable(true);
 			startRect = null;
 			growEls = null;
@@ -99,7 +104,7 @@
 			if (anchorEl) anchorEl.style.transform = 'none';
 
 			// Target: a centered portrait card, not edge-to-edge fullscreen.
-			const targetWidth = Math.min(800, window.innerWidth * 0.92);
+			const targetWidth = Math.min(1000, window.innerWidth * 0.94);
 			const targetHeight = Math.min(window.innerHeight * 0.92, 1000);
 			const targetLeft = (window.innerWidth - targetWidth) / 2;
 			const targetTop = (window.innerHeight - targetHeight) / 2;
@@ -121,15 +126,30 @@
 				el.style.fontSize = startPx * (1 + 0.5 * p) + 'px';
 			}
 
-			// Fade the desktop's grid + panel border to flat --bg so nothing
-			// shows through around the floating card.
+			// Fade the desktop's grid + panel border, and the card's own
+			// border, to flat --bg — nothing shows through around the card and
+			// the card itself reads as part of the background.
 			desktopEl?.style.setProperty('--chrome', String(fade));
+			centerWindowEl.style.setProperty('--win-chrome', String(fade));
 			centerWindowInstance?.setDraggable(false);
 		}
 
 		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl], { autoAlpha: fade });
 		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
 		maximized = p >= 0.999;
+	}
+
+	function setTarget(next: number) {
+		target = clamp01(next);
+		if (!gsapRef) return;
+		smoothTween?.kill();
+		smoothTween = gsapRef.to(driver, {
+			p: target,
+			duration: 0.5,
+			ease: 'power3.out',
+			overwrite: 'auto',
+			onUpdate: () => render(driver.p)
+		});
 	}
 
 	$effect(() => {
@@ -140,19 +160,17 @@
 		function onWheel(event: WheelEvent) {
 			if (!window.matchMedia(DESKTOP_QUERY).matches) return;
 
-			const atTop = progress >= 1 && (!centerContentEl || centerContentEl.scrollTop <= 0);
-			if (progress >= 1 && event.deltaY > 0) return;
-			if (progress >= 1 && event.deltaY < 0 && !atTop) return;
+			const atTop = target >= 1 && (!centerContentEl || centerContentEl.scrollTop <= 0);
+			if (target >= 1 && event.deltaY > 0) return;
+			if (target >= 1 && event.deltaY < 0 && !atTop) return;
 
 			event.preventDefault();
-			progress = clamp01(progress + event.deltaY / MAXIMIZE_DISTANCE);
-			applyProgress(progress);
+			setTarget(target + event.deltaY / MAXIMIZE_DISTANCE);
 		}
 
 		function onResize() {
-			if (!window.matchMedia(DESKTOP_QUERY).matches && progress > 0) {
-				progress = 0;
-				applyProgress(0);
+			if (!window.matchMedia(DESKTOP_QUERY).matches && target > 0) {
+				setTarget(0);
 			}
 		}
 
@@ -166,8 +184,9 @@
 			if (isDesktop && reduceMotion) {
 				// No motion: skip the wheel-jack entirely and land straight on
 				// the maximized view so the resume content stays reachable.
-				progress = 1;
-				applyProgress(1);
+				target = 1;
+				driver.p = 1;
+				render(1);
 				return;
 			}
 

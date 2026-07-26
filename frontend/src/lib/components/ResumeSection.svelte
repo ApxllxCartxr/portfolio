@@ -44,7 +44,7 @@
 
 <style>
 	.resume {
-		max-width: 640px;
+		max-width: 840px;
 		margin: 3rem auto 0;
 		padding: 2rem 0 1rem;
 		border-top: 1px solid var(--fg);
@@ -52,7 +52,7 @@
 
 	h2 {
 		font-family: var(--font-title);
-		font-size: 1.3rem;
+		font-size: 1.5rem;
 		font-weight: 600;
 		margin: 2.25rem 0 1.1rem;
 	}
@@ -71,14 +71,14 @@
 
 	.entry h3 {
 		font-family: var(--font-title);
-		font-size: 1.02rem;
+		font-size: 1.15rem;
 		font-weight: 600;
 		margin: 0 0 0.3rem;
 	}
 
 	.meta {
 		font-family: var(--font-mono);
-		font-size: 0.72rem;
+		font-size: 0.78rem;
 		letter-spacing: 0.01em;
 		opacity: 0.65;
 		margin: 0 0 0.7rem;
@@ -89,7 +89,7 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		font-family: var(--font-body);
-		font-size: 0.9rem;
+		font-size: 1rem;
 		line-height: 1.55;
 		padding-left: 1.1rem;
 		margin: 0;
@@ -97,7 +97,7 @@
 
 	.skills {
 		font-family: var(--font-mono);
-		font-size: 0.78rem;
+		font-size: 0.88rem;
 		line-height: 1.9;
 		opacity: 0.8;
 		margin: 0;
