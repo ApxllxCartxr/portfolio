@@ -15,7 +15,61 @@
 	</span>
 </button>
 
+<div class="bio">
+	<p>
+		Software developer, currently building full-stack systems as a dev intern at Picabord
+		Technologies — multi-tenant CRMs, RBAC, and everything underneath them.
+	</p>
+	<p>
+		Also shipped a real-time crowd-safety app for one of the world's largest gatherings, and a
+		discrete-event train simulator modelling an entire metro network as a weighted graph.
+	</p>
+	<p class="context">
+		CS student at Chennai Institute of Technology, leading a 35-member entrepreneurship cell on the
+		side.
+	</p>
+</div>
+
+<div class="links">
+	<a href="mailto:josephfernando05@proton.me">Email</a>
+	<a href="https://github.com/apxllxcartxr" target="_blank" rel="noreferrer">GitHub</a>
+</div>
+
 <style>
+	.bio {
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
+		margin-top: 1.1rem;
+		font-family: var(--font-body);
+		font-size: 0.92rem;
+		line-height: 1.5;
+	}
+
+	.context {
+		opacity: 0.85;
+	}
+
+	.links {
+		display: flex;
+		gap: 1rem;
+		margin-top: 1.1rem;
+		padding-top: 0.8rem;
+		border-top: 1px solid var(--fg);
+		font-family: var(--font-mono);
+		font-size: 0.8rem;
+	}
+
+	.links a {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	.links a:hover,
+	.links a:focus-visible {
+		color: var(--accent);
+	}
+
 	.name-card {
 		display: flex;
 		flex-direction: column;

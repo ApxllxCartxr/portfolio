@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import GridLayer from './GridLayer.svelte';
+	import ThemeSwatchMenu from './ThemeSwatchMenu.svelte';
 
 	interface Props {
 		desktopEl?: HTMLDivElement;
@@ -16,6 +17,7 @@
 
 <div class="desktop" bind:this={desktopEl}>
 	<GridLayer />
+	<ThemeSwatchMenu boundsEl={desktopEl} />
 	<div class="surface">
 		{@render children?.()}
 	</div>
@@ -24,16 +26,16 @@
 <style>
 	.desktop {
 		position: relative;
-		margin: clamp(0.75rem, 3vw, 2.5rem);
+		margin: clamp(0.5rem, 2.1vw, 1.75rem);
 		border: 2px solid var(--fg);
 		overflow: hidden;
-		min-height: calc(100dvh - clamp(1.5rem, 6vw, 5rem));
+		min-height: calc(100dvh - clamp(1rem, 4.2vw, 3.5rem));
 	}
 
 	.surface {
 		position: relative;
 		height: 100%;
-		min-height: calc(100dvh - clamp(1.5rem, 6vw, 5rem) - 4px);
+		min-height: calc(100dvh - clamp(1rem, 4.2vw, 3.5rem) - 4px);
 		padding: clamp(1rem, 3vw, 2rem);
 	}
 </style>

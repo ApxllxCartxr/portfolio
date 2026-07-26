@@ -4,11 +4,12 @@
 	import WeatherCard from '$lib/components/WeatherCard.svelte';
 	import ClockCard from '$lib/components/ClockCard.svelte';
 	import CenterCard from '$lib/components/CenterCard.svelte';
-	import ThemeControls from '$lib/components/ThemeControls.svelte';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 
 	const WINDOW_IDS = ['weather', 'center', 'date'] as const;
 	type WindowId = (typeof WINDOW_IDS)[number];
 
+	let loaded = $state(false);
 	let desktopEl = $state<HTMLDivElement>();
 	let openWindows = $state<Record<WindowId, boolean>>({
 		weather: true,
@@ -41,19 +42,24 @@
 	<meta name="description" content="Personal portfolio — a desktop-style homepage." />
 </svelte:head>
 
+<LoadingScreen onDone={() => (loaded = true)} />
+
 <main class="page">
 	<Desktop bind:desktopEl>
-		<ThemeControls onRestore={restoreAll} hasClosedWindows={hasClosed} />
+		{#if hasClosed}
+			<button type="button" class="restore" onclick={restoreAll}>Restore windows</button>
+		{/if}
 
-		<!-- Gate window mounting on desktopEl so each Window's onMount always
-		     sees a real boundsEl — otherwise Draggable can silently never
-		     attach if a window mounts before the bind:this above resolves. -->
-		{#if desktopEl}
+		<!-- Gate window mounting on desktopEl (so each Window's onMount always
+		     sees a real boundsEl) and on loaded, so the windows bloom in right
+		     as the loading grid finishes drawing rather than sitting there
+		     idle underneath it. -->
+		{#if desktopEl && loaded}
 			{#if openWindows.weather}
 				<Window
 					title="Weather"
-					x={18}
-					y={38}
+					x={9}
+					y={16}
 					order={2}
 					boundsEl={desktopEl}
 					zIndex={zIndexOf('weather')}
@@ -68,7 +74,7 @@
 				<Window
 					title="Info"
 					x={50}
-					y={58}
+					y={50}
 					order={1}
 					boundsEl={desktopEl}
 					zIndex={zIndexOf('center')}
@@ -84,8 +90,8 @@
 			{#if openWindows.date}
 				<Window
 					title="Date"
-					x={82}
-					y={32}
+					x={91}
+					y={16}
 					order={3}
 					boundsEl={desktopEl}
 					zIndex={zIndexOf('date')}
@@ -103,5 +109,32 @@
 	.page {
 		min-height: 100dvh;
 		background: var(--bg);
+	}
+
+	@media (min-width: 701px) {
+		.page {
+			height: 100dvh;
+			overflow: hidden;
+		}
+	}
+
+	.restore {
+		position: absolute;
+		top: 0.75rem;
+		right: 0.75rem;
+		z-index: 50;
+		font-family: var(--font-mono);
+		font-size: 0.7rem;
+		padding: 0.35rem 0.6rem;
+		border: 1px solid var(--fg);
+		background: var(--bg);
+		color: var(--fg);
+		cursor: pointer;
+	}
+
+	.restore:hover,
+	.restore:focus-visible {
+		background: var(--fg);
+		color: var(--bg);
 	}
 </style>

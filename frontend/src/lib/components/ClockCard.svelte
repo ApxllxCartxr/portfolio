@@ -42,14 +42,18 @@
 	}
 
 	.day {
-		font-size: 1.15rem;
+		font-size: 1.8rem;
+		font-weight: 700;
 	}
 
 	.date {
-		font-size: 0.85rem;
+		font-size: 1.2rem;
+		font-weight: 700;
 	}
 
 	.time {
-		font-size: 0.75rem;
+		font-size: 1.4rem;
+		font-weight: 700;
+		opacity: 0.8;
 	}
 </style>

@@ -1,4 +1,4 @@
-export const THEMES = ['milk-sea', 'arch-paper', 'straw-berry'] as const;
+export const THEMES = ['milk-sea', 'arch-paper', 'straw-berry', 'persian-indigo'] as const;
 export type ThemeName = (typeof THEMES)[number];
 
 // Mirrors the [data-theme] blocks in app.css — kept here too so swatch
@@ -6,13 +6,25 @@ export type ThemeName = (typeof THEMES)[number];
 export const THEME_COLORS: Record<ThemeName, readonly [string, string]> = {
 	'milk-sea': ['#F4F1EC', '#191265'],
 	'arch-paper': ['#076C45', '#F4F1EC'],
-	'straw-berry': ['#F4F1EC', '#990011']
+	'straw-berry': ['#F4F1EC', '#990011'],
+	'persian-indigo': ['#F4F1EC', '#391285']
+};
+
+// Every theme pairs its --c1/--c2 with the same pale off-white, so a swatch
+// built from the full pair reads as white-plus-a-color. Swatches use just
+// the theme's saturated brand colour (never the pale one) as a solid fill.
+export const SWATCH_COLORS: Record<ThemeName, string> = {
+	'milk-sea': '#191265',
+	'arch-paper': '#076C45',
+	'straw-berry': '#990011',
+	'persian-indigo': '#391285'
 };
 
 export const THEME_LABELS: Record<ThemeName, string> = {
 	'milk-sea': 'Milk Sea',
 	'arch-paper': 'Arch Paper',
-	'straw-berry': 'Strawberry'
+	'straw-berry': 'Strawberry',
+	'persian-indigo': 'Persian Indigo'
 };
 
 const THEME_KEY = 'theme';

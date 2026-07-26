@@ -55,7 +55,7 @@
 		<p class="status">Weather unavailable</p>
 	{:else if weather}
 		<div class="row">
-			<Icon name={weather.icon} size={28} />
+			<Icon name={weather.icon} size={34} />
 			<span class="temp">{temp}°C</span>
 		</div>
 		<p class="label">{weather.label}</p>
@@ -78,18 +78,24 @@
 	}
 
 	.temp {
-		font-size: 1.5rem;
+		font-size: 2.6rem;
+		font-weight: 700;
+		line-height: 1;
 	}
 
 	.label {
-		font-size: 0.85rem;
+		font-size: 1.2rem;
+		font-weight: 700;
 	}
 
 	.place {
-		font-size: 0.75rem;
+		font-size: 0.9rem;
+		font-weight: 500;
+		opacity: 0.75;
 	}
 
 	.status {
-		font-size: 0.85rem;
+		font-size: 1.1rem;
+		font-weight: 700;
 	}
 </style>

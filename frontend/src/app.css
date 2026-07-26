@@ -133,6 +133,13 @@
 	--accent-c2: #ff8fb3; /* light pink — reads on the red bg */
 }
 
+:root[data-theme='persian-indigo'] {
+	--c1: #f4f1ec;
+	--c2: #391285;
+	--accent-c1: #6a0dad; /* violet — reads on the pale bg */
+	--accent-c2: #ffd700; /* gold — reads on the indigo bg */
+}
+
 :root {
 	--bg: var(--c1);
 	--fg: var(--c2);
@@ -161,6 +168,19 @@ html {
 
 body {
 	min-height: 100dvh;
+}
+
+/* Desktop windows are absolutely positioned and drag-bounded to the desktop
+   panel, so the page should never need to scroll at this width — clip any
+   sub-pixel rounding overflow instead of showing a scrollbar. Mobile is
+   excluded: there, windows stack as full-height cards taller than one
+   viewport, and that content needs normal document scroll to reach it. */
+@media (min-width: 701px) {
+	html,
+	body {
+		height: 100%;
+		overflow: hidden;
+	}
 }
 
 ::selection {
