@@ -227,7 +227,11 @@
 		display: flex;
 		align-items: center;
 		padding: 0.5rem 0.6rem;
-		background: var(--fg);
+		/* Fades in lockstep with the border (--win-chrome) so the titlebar
+		   blends into the card instead of reading as a leftover solid bar once
+		   the border around it has faded away — see WindowControls.svelte for
+		   the matching icon-color fade that keeps the buttons legible. */
+		background: color-mix(in srgb, var(--fg) calc(var(--win-chrome, 1) * 100%), var(--bg));
 		cursor: grab;
 		user-select: none;
 		-webkit-user-select: none;

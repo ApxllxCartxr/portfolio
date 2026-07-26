@@ -55,7 +55,10 @@
 		justify-content: center;
 		border: 1.5px solid transparent;
 		background: none;
-		color: var(--bg);
+		/* Inherited from the titlebar (see Window.svelte) — fades opposite the
+		   titlebar's own background so the glyphs stay legible as the whole
+		   bar fades from solid --fg toward --bg. */
+		color: color-mix(in srgb, var(--bg) calc(var(--win-chrome, 1) * 100%), var(--fg));
 		padding: 0;
 		line-height: 1;
 	}
