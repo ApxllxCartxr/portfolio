@@ -9,6 +9,7 @@
 	import { browser } from '$app/environment';
 	import type { Snippet } from 'svelte';
 	import WindowControls from './WindowControls.svelte';
+	import { DESKTOP_QUERY } from '$lib/breakpoints';
 
 	interface Props {
 		title: string;
@@ -65,7 +66,6 @@
 	}
 
 	const STEP = 16;
-	const DESKTOP_QUERY = '(min-width: 701px)';
 
 	onMount(() => {
 		if (!browser || !windowEl || !titlebarEl || !boundsEl) return;
@@ -272,7 +272,7 @@
 		   Fixed (not max-) height so there's always room reserved below the
 		   tagline for CenterCard's bottom-pinned scroll cue. */
 		.window.primary:not(.maximized) .content {
-			height: min(52vh, 420px);
+			height: min(44vh, 340px);
 			overflow: hidden;
 		}
 	}

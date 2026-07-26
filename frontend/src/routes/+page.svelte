@@ -6,16 +6,15 @@
 	import ClockCard from '$lib/components/ClockCard.svelte';
 	import CenterCard from '$lib/components/CenterCard.svelte';
 	import ResumeSection from '$lib/components/ResumeSection.svelte';
+	import { DESKTOP_QUERY } from '$lib/breakpoints';
 
 	const WINDOW_IDS = ['weather', 'center', 'date'] as const;
 	type WindowId = (typeof WINDOW_IDS)[number];
 
-	const DESKTOP_QUERY = '(min-width: 701px)';
 	// Wheel-distance (px-equivalent of accumulated deltaY) to go from compact
 	// card to fully maximized.
 	const MAXIMIZE_DISTANCE = 700;
 
-	let loaded = $state(true);
 	let desktopEl = $state<HTMLDivElement>();
 	let weatherWindowEl = $state<HTMLElement>();
 	let centerWindowEl = $state<HTMLElement>();
@@ -90,6 +89,8 @@
 			centerWindowInstance?.setDraggable(true);
 			startRect = null;
 			growEls = null;
+			gridEl = null;
+			scrollCueEl = null;
 		} else {
 			// The anchor's own `transform` (used to center it on x/y) would
 			// otherwise become the containing block for a `position: fixed`
@@ -155,10 +156,13 @@
 			autoAlpha: fade
 		});
 		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
-	}
 
-	function updateMaximized(next: boolean) {
-		maximized = next;
+		// Drive `maximized` from the same per-frame call that renders the
+		// card's actual size, so the CSS gated on it (bio/links/resume) can
+		// never fall out of sync with what's on screen — setTarget() kills
+		// in-flight tweens on every wheel tick (which skips onComplete), so
+		// onComplete alone isn't a reliable place to flip this.
+		maximized = p >= 0.999;
 	}
 
 	function setTarget(next: number) {
@@ -170,8 +174,7 @@
 			duration: 0.5,
 			ease: 'power3.out',
 			overwrite: 'auto',
-			onUpdate: () => render(driver.p),
-			onComplete: () => updateMaximized(driver.p >= 0.999)
+			onUpdate: () => render(driver.p)
 		});
 	}
 
@@ -182,7 +185,8 @@
 	$effect(() => {
 		void maximized;
 		revealTween?.kill();
-		if (maximized && gsapRef && centerWindowEl) {
+		const reduceMotion = browser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		if (maximized && gsapRef && centerWindowEl && !reduceMotion) {
 			const bioEls = centerWindowEl.querySelectorAll<HTMLElement>('.bio, .links');
 			const resumeEls = centerWindowEl.querySelectorAll<HTMLElement>('.resume h2, .resume .entry');
 			const pillEls = centerWindowEl.querySelectorAll<HTMLElement>('.resume .pill');
@@ -212,7 +216,7 @@
 	});
 
 	$effect(() => {
-		if (!browser || !loaded || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
+		if (!browser || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
 
 		let cancelled = false;
 
@@ -246,7 +250,6 @@
 				target = 1;
 				driver.p = 1;
 				render(1);
-				updateMaximized(true);
 				return;
 			}
 
@@ -273,11 +276,9 @@
 			<button type="button" class="restore" onclick={restoreAll}>Restore windows</button>
 		{/if}
 
-		<!-- Gate window mounting on desktopEl (so each Window's onMount always
-		     sees a real boundsEl) and on loaded, so the windows bloom in right
-		     as the loading grid finishes drawing rather than sitting there
-		     idle underneath it. -->
-		{#if desktopEl && loaded}
+		<!-- Gate window mounting on desktopEl so each Window's onMount always
+		     sees a real boundsEl. -->
+		{#if desktopEl}
 			{#if openWindows.weather}
 				<Window
 					title="Weather"

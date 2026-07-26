@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(python3 -c \"import fontTools\")",
-      "Read(//home/apollo/docs/fonts/**)"
+      "Read(//home/apollo/docs/fonts/**)",
+      "Bash(pnpm run *)",
+      "Bash(pnpm exec *)",
+      "Bash(git commit *)",
+      "Bash(git add *)",
+      "Bash(git reset *)",
+      "Bash(npx prettier *)",
+      "Bash(pkill -f \"vite dev\")",
+      "Bash(kill -9 13450)",
+      "Bash(kill 8379)",
+      "Bash(npm view *)"
     ]
   }
 }
