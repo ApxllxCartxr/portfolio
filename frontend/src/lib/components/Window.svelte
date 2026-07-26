@@ -34,6 +34,10 @@
 		windowEl?: HTMLElement;
 		contentEl?: HTMLElement;
 		titlebarEl?: HTMLElement;
+		// Names this window for the View Transitions morph into/out of its
+		// full-page counterpart (see PageWindow.svelte) — only the Blog window
+		// sets this today. Left unset, no `view-transition-name` is applied.
+		transitionName?: string;
 		children?: Snippet;
 	}
 
@@ -53,6 +57,7 @@
 		windowEl = $bindable(),
 		contentEl = $bindable(),
 		titlebarEl = $bindable(),
+		transitionName,
 		children
 	}: Props = $props();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -205,6 +210,7 @@
 		class="window {size}"
 		class:maximized
 		bind:this={windowEl}
+		style:view-transition-name={transitionName}
 		aria-label={title}
 		tabindex="0"
 		onkeydown={handleKeydown}

@@ -544,6 +544,7 @@
 					onMaximize={toggleBlogMaximize}
 					maximized={blogMaximized}
 					anchorFixed={blogAnchorFixed}
+					transitionName="blog-window"
 					bind:windowEl={blogWindowEl}
 					bind:this={blogWindowInstance}
 				>
@@ -556,8 +557,10 @@
 
 <style>
 	.page {
+		/* No background of its own — html already paints --bg plus the paper
+		   grain texture (see app.css); repainting a flat colour here would
+		   hide the grain underneath. */
 		min-height: 100dvh;
-		background: var(--bg);
 	}
 
 	.restore {

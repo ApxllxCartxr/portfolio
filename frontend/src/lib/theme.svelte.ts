@@ -5,7 +5,7 @@ export type ThemeName = (typeof THEMES)[number];
 // buttons can render every theme's colours, not just the active one.
 export const THEME_COLORS: Record<ThemeName, readonly [string, string]> = {
 	'milk-sea': ['#F4F1EC', '#191265'],
-	'arch-paper': ['#076C45', '#F4F1EC'],
+	'arch-paper': ['#06392F', '#F4F1EC'],
 	'straw-berry': ['#F4F1EC', '#990011'],
 	'persian-indigo': ['#F4F1EC', '#391285']
 };
@@ -15,7 +15,7 @@ export const THEME_COLORS: Record<ThemeName, readonly [string, string]> = {
 // the theme's saturated brand colour (never the pale one) as a solid fill.
 export const SWATCH_COLORS: Record<ThemeName, string> = {
 	'milk-sea': '#191265',
-	'arch-paper': '#076C45',
+	'arch-paper': '#06392F',
 	'straw-berry': '#990011',
 	'persian-indigo': '#391285'
 };

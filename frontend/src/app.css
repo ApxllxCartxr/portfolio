@@ -120,7 +120,7 @@
 }
 
 :root[data-theme='arch-paper'] {
-	--c1: #076c45;
+	--c1: #06392f;
 	--c2: #f4f1ec;
 	--accent-c1: #ffa500; /* amber — reads on the green bg */
 	--accent-c2: #c1440e; /* rust — reads on the pale bg */
@@ -159,7 +159,13 @@
 }
 
 html {
-	background: var(--bg);
+	background-color: var(--bg);
+	/* Every theme pairs its bg/fg with a pale "paper" tone (see THEME TOKENS
+	   above), so a subtle grain reads consistently across all of them, not
+	   just arch-paper. */
+	background-image: url('/textures/paper-noise.svg');
+	background-repeat: repeat;
+	background-blend-mode: overlay;
 	color: var(--fg);
 	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
@@ -207,5 +213,21 @@ a {
 	*::after {
 		animation-duration: 0.001ms !important;
 		transition-duration: 0.001ms !important;
+	}
+}
+
+/* Morphs the Blog window (homepage) into its full-page chrome (/blog) and
+   back — matched by view-transition-name on Window.svelte's `.window` and
+   PageWindow.svelte's `.window`. Tuned to roughly match the site's existing
+   GSAP power3.out maximize easing rather than the browser's default
+   ease-in-out crossfade. */
+::view-transition-group(blog-window) {
+	animation-duration: 0.4s;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-group(blog-window) {
+		animation: none;
 	}
 }

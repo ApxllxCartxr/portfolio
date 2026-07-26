@@ -9,57 +9,31 @@
 	<title>Blog — Joseph Fernando</title>
 </svelte:head>
 
-<main class="wrap">
-	<a class="back" href={resolve('/')}>&larr; Home</a>
+<h1>Blog</h1>
 
-	<h1>Blog</h1>
-
-	{#if data.posts.length === 0}
-		<p class="empty">No posts yet — check back soon.</p>
-	{:else}
-		<ul class="posts">
-			{#each data.posts as post (post.id)}
-				<li>
-					<a href={resolve('/blog/[slug]', { slug: post.slug })}>
-						<h2>{post.title}</h2>
-						{#if post.excerpt}<p class="excerpt">{post.excerpt}</p>{/if}
-						<time datetime={post.created_at}
-							>{new Date(post.created_at).toLocaleDateString('en-US', {
-								year: 'numeric',
-								month: 'long',
-								day: 'numeric'
-							})}</time
-						>
-					</a>
-				</li>
-			{/each}
-		</ul>
-	{/if}
-</main>
+{#if data.posts.length === 0}
+	<p class="empty">No posts yet — check back soon.</p>
+{:else}
+	<ul class="posts">
+		{#each data.posts as post (post.id)}
+			<li>
+				<a href={resolve('/blog/[slug]', { slug: post.slug })}>
+					<h2>{post.title}</h2>
+					{#if post.excerpt}<p class="excerpt">{post.excerpt}</p>{/if}
+					<time datetime={post.created_at}
+						>{new Date(post.created_at).toLocaleDateString('en-US', {
+							year: 'numeric',
+							month: 'long',
+							day: 'numeric'
+						})}</time
+					>
+				</a>
+			</li>
+		{/each}
+	</ul>
+{/if}
 
 <style>
-	.wrap {
-		max-width: 720px;
-		margin: 0 auto;
-		padding: 3rem 1.25rem 5rem;
-		color: var(--fg);
-	}
-
-	.back {
-		display: inline-block;
-		font-family: var(--font-mono);
-		font-size: 0.8rem;
-		color: inherit;
-		text-decoration: underline;
-		text-underline-offset: 3px;
-		margin-bottom: 2rem;
-	}
-
-	.back:hover,
-	.back:focus-visible {
-		color: var(--accent);
-	}
-
 	h1 {
 		font-family: var(--font-title);
 		font-size: 2.5rem;
