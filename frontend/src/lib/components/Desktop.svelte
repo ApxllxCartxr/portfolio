@@ -27,7 +27,10 @@
 	.desktop {
 		position: relative;
 		margin: clamp(0.5rem, 2.1vw, 1.75rem);
-		border: 2px solid var(--fg);
+		/* --chrome fades this border to flat --bg while the center window
+		   maximizes (driven from +page.svelte), so nothing shows through
+		   around the floating card. */
+		border: 2px solid color-mix(in srgb, var(--fg) calc(var(--chrome, 1) * 100%), transparent);
 		overflow: hidden;
 		min-height: calc(100dvh - clamp(1rem, 4.2vw, 3.5rem));
 	}

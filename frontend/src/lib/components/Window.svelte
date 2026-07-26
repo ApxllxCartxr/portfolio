@@ -23,6 +23,7 @@
 		maximized?: boolean;
 		windowEl?: HTMLElement;
 		contentEl?: HTMLElement;
+		titlebarEl?: HTMLElement;
 		children?: Snippet;
 	}
 
@@ -39,10 +40,9 @@
 		maximized = false,
 		windowEl = $bindable(),
 		contentEl = $bindable(),
+		titlebarEl = $bindable(),
 		children
 	}: Props = $props();
-
-	let titlebarEl = $state<HTMLElement>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,6 +201,9 @@
 
 	.window.maximized .content {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
+		justify-content: safe center;
 		overflow-y: auto;
 		max-height: none;
 	}

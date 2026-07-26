@@ -21,6 +21,7 @@
 	let weatherWindowEl = $state<HTMLElement>();
 	let centerWindowEl = $state<HTMLElement>();
 	let centerContentEl = $state<HTMLElement>();
+	let centerTitlebarEl = $state<HTMLElement>();
 	let dateWindowEl = $state<HTMLElement>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let centerWindowInstance: any = $state();
@@ -51,13 +52,15 @@
 	let hasClosed = $derived(WINDOW_IDS.some((id) => !openWindows[id]));
 
 	// Wheel-driven maximize: wheeling down over the desktop grows the center
-	// window into a true fullscreen overlay (covering the whole viewport, not
-	// just the desktop panel); wheeling up — once the window's own content is
-	// scrolled back to its top — shrinks it back. The page itself never
-	// scrolls; scrolling only ever drives this progress value or the center
-	// window's own internal content once maximized.
+	// window into a centered portrait card (not edge-to-edge fullscreen);
+	// wheeling up — once the window's own content is scrolled back to its
+	// top — shrinks it back. The page itself never scrolls; scrolling only
+	// ever drives this progress value or the center window's own internal
+	// content once maximized.
 	let progress = 0;
 	let startRect: DOMRect | null = null;
+	let growEls: { el: HTMLElement; startPx: number }[] | null = null;
+	let gridEl: HTMLElement | null = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 
@@ -68,24 +71,43 @@
 	function applyProgress(p: number) {
 		if (!gsapRef || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
 		const anchorEl = centerWindowEl.parentElement as HTMLElement | null;
+		const fade = 1 - Math.min(p / 0.3, 1);
 
 		if (p <= 0) {
 			gsapRef.set(centerWindowEl, { clearProps: 'position,left,top,width,height,zIndex' });
 			if (anchorEl) anchorEl.style.transform = '';
+			if (growEls) for (const { el } of growEls) el.style.fontSize = '';
+			desktopEl?.style.removeProperty('--chrome');
 			centerWindowInstance?.setDraggable(true);
 			startRect = null;
+			growEls = null;
 		} else {
 			// The anchor's own `transform` (used to center it on x/y) would
 			// otherwise become the containing block for a `position: fixed`
 			// descendant, trapping the maximized window inside the desktop
-			// panel instead of covering the viewport — neutralize it while
+			// panel instead of escaping to the viewport — neutralize it while
 			// animating.
 			if (!startRect) startRect = centerWindowEl.getBoundingClientRect();
+			if (!growEls) {
+				const els = centerWindowEl.querySelectorAll<HTMLElement>('.name, .bio p, .links a');
+				growEls = Array.from(els).map((el) => ({
+					el,
+					startPx: parseFloat(getComputedStyle(el).fontSize)
+				}));
+			}
+			if (!gridEl) gridEl = desktopEl?.querySelector<HTMLElement>('.grid-layer') ?? null;
 			if (anchorEl) anchorEl.style.transform = 'none';
-			const left = startRect.left * (1 - p);
-			const top = startRect.top * (1 - p);
-			const width = startRect.width + (window.innerWidth - startRect.width) * p;
-			const height = startRect.height + (window.innerHeight - startRect.height) * p;
+
+			// Target: a centered portrait card, not edge-to-edge fullscreen.
+			const targetWidth = Math.min(800, window.innerWidth * 0.92);
+			const targetHeight = Math.min(window.innerHeight * 0.92, 1000);
+			const targetLeft = (window.innerWidth - targetWidth) / 2;
+			const targetTop = (window.innerHeight - targetHeight) / 2;
+
+			const left = startRect.left + (targetLeft - startRect.left) * p;
+			const top = startRect.top + (targetTop - startRect.top) * p;
+			const width = startRect.width + (targetWidth - startRect.width) * p;
+			const height = startRect.height + (targetHeight - startRect.height) * p;
 			gsapRef.set(centerWindowEl, {
 				position: 'fixed',
 				left,
@@ -94,10 +116,19 @@
 				height,
 				zIndex: 999
 			});
+
+			for (const { el, startPx } of growEls) {
+				el.style.fontSize = startPx * (1 + 0.5 * p) + 'px';
+			}
+
+			// Fade the desktop's grid + panel border to flat --bg so nothing
+			// shows through around the floating card.
+			desktopEl?.style.setProperty('--chrome', String(fade));
 			centerWindowInstance?.setDraggable(false);
 		}
 
-		gsapRef.set([weatherWindowEl, dateWindowEl], { autoAlpha: 1 - Math.min(p / 0.3, 1) });
+		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl], { autoAlpha: fade });
+		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
 		maximized = p >= 0.999;
 	}
 
@@ -200,6 +231,7 @@
 					{maximized}
 					bind:windowEl={centerWindowEl}
 					bind:contentEl={centerContentEl}
+					bind:titlebarEl={centerTitlebarEl}
 					bind:this={centerWindowInstance}
 				>
 					<CenterCard {maximized} />

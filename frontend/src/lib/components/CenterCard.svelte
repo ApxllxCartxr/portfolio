@@ -8,40 +8,69 @@
 	let { maximized = false }: Props = $props();
 </script>
 
-<button
-	type="button"
-	class="name-card"
-	onclick={toggleSwap}
-	aria-label="Joseph Fernando — click to swap the theme colors"
->
-	<span class="intro">hi i'm</span>
-	<span class="name">
-		Joseph<br />
-		Fernando <span class="accent">*</span>
-	</span>
-</button>
+<div class="layout" class:maximized>
+	<button
+		type="button"
+		class="name-card"
+		onclick={toggleSwap}
+		aria-label="Joseph Fernando — click to swap the theme colors"
+	>
+		<span class="intro">hi i'm</span>
+		<span class="name">
+			Joseph<br />
+			Fernando <span class="accent">*</span>
+		</span>
+	</button>
 
-<div class="bio" class:maximized>
-	<p>
-		Software developer, currently building full-stack systems as a dev intern at Picabord
-		Technologies — multi-tenant CRMs, RBAC, and everything underneath them.
-	</p>
-	<p>
-		Also shipped a real-time crowd-safety app for one of the world's largest gatherings, and a
-		discrete-event train simulator modelling an entire metro network as a weighted graph.
-	</p>
-	<p class="context">
-		CS student at Chennai Institute of Technology, leading a 35-member entrepreneurship cell on the
-		side.
-	</p>
-</div>
+	<div class="info">
+		<div class="bio" class:maximized>
+			<p>
+				Software developer, currently building full-stack systems as a dev intern at Picabord
+				Technologies — multi-tenant CRMs, RBAC, and everything underneath them.
+			</p>
+			<p>
+				Also shipped a real-time crowd-safety app for one of the world's largest gatherings, and a
+				discrete-event train simulator modelling an entire metro network as a weighted graph.
+			</p>
+			<p class="context">
+				CS student at Chennai Institute of Technology, leading a 35-member entrepreneurship cell on
+				the side.
+			</p>
+		</div>
 
-<div class="links" class:maximized>
-	<a href="mailto:josephfernando05@proton.me">Email</a>
-	<a href="https://github.com/apxllxcartxr" target="_blank" rel="noreferrer">GitHub</a>
+		<div class="links" class:maximized>
+			<a href="mailto:josephfernando05@proton.me">Email</a>
+			<a href="https://github.com/apxllxcartxr" target="_blank" rel="noreferrer">GitHub</a>
+		</div>
+	</div>
 </div>
 
 <style>
+	.layout {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.layout.maximized {
+		flex-direction: row;
+		align-items: flex-start;
+		gap: 2.5rem;
+	}
+
+	.layout.maximized .name-card {
+		width: auto;
+		flex-shrink: 0;
+	}
+
+	.layout.maximized .info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.layout.maximized .bio {
+		margin-top: 0;
+	}
+
 	.bio {
 		display: flex;
 		flex-direction: column;

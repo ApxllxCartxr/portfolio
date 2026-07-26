@@ -156,7 +156,6 @@
 :root {
 	--grid-line: color-mix(in srgb, var(--fg) 45%, transparent);
 	--focus-ring: var(--fg);
-	--card-bg: color-mix(in srgb, var(--bg) 90%, var(--fg) 10%);
 }
 
 html {
