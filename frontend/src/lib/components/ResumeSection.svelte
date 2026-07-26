@@ -41,6 +41,16 @@
 						onclick={() => onOpenDemo?.(project.demoId ?? '')}
 					>
 						{project.name}
+						<svg class="demo-arrow" viewBox="0 0 10 10" aria-hidden="true">
+							<path
+								d="M2.4 7.6 7.6 2.4M3.4 2.4h4.2v4.2"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
 					</button>
 				{:else}
 					{project.name}
@@ -94,6 +104,9 @@
 	}
 
 	.demo-trigger {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.3rem;
 		font: inherit;
 		color: inherit;
 		background: none;
@@ -110,6 +123,23 @@
 	.demo-trigger:focus-visible {
 		background: color-mix(in srgb, var(--fg) 10%, transparent);
 		outline: none;
+	}
+
+	.demo-arrow {
+		width: 0.65em;
+		height: 0.65em;
+		align-self: center;
+		flex-shrink: 0;
+		opacity: 0.55;
+		transition:
+			opacity 0.15s ease,
+			transform 0.15s ease;
+	}
+
+	.demo-trigger:hover .demo-arrow,
+	.demo-trigger:focus-visible .demo-arrow {
+		opacity: 0.9;
+		transform: translate(1px, -1px);
 	}
 
 	.meta {
