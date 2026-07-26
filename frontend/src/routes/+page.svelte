@@ -46,8 +46,13 @@
 
 	// Ephemeral project-demo popup — opened by clicking a project inside
 	// ResumeSection, independent of the persistent WINDOW_IDS/openWindows/
-	// zOrder system above (it's not part of "Restore windows").
+	// zOrder system above (it's not part of "Restore windows"). Closes
+	// itself whenever the Info window leaves the maximized state, since
+	// the project it was opened from is no longer on screen.
 	let cmrlsimOpen = $state(false);
+	$effect(() => {
+		if (!maximized) cmrlsimOpen = false;
+	});
 
 	function zIndexOf(id: WindowId) {
 		return zOrder.indexOf(id) + 1;
@@ -463,7 +468,6 @@
 					boundsEl={desktopEl}
 					zIndex={1000}
 					size="compact"
-					draggable={false}
 					onClose={() => (cmrlsimOpen = false)}
 					onFront={() => {}}
 				>

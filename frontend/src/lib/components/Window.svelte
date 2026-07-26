@@ -23,7 +23,6 @@
 		onMaximize?: () => void;
 		size?: 'primary' | 'compact';
 		maximized?: boolean;
-		draggable?: boolean;
 		windowEl?: HTMLElement;
 		contentEl?: HTMLElement;
 		titlebarEl?: HTMLElement;
@@ -42,7 +41,6 @@
 		onMaximize,
 		size = 'compact',
 		maximized = false,
-		draggable: isDraggable = true,
 		windowEl = $bindable(),
 		contentEl = $bindable(),
 		titlebarEl = $bindable(),
@@ -81,22 +79,18 @@
 			if (!isDesktop) return;
 
 			const { gsap } = await import('gsap');
+			const { Draggable } = await import('gsap/Draggable');
 			if (cancelled || !windowEl || !titlebarEl || !boundsEl) return;
 
+			gsap.registerPlugin(Draggable);
 			gsapRef = gsap;
-
-			if (isDraggable) {
-				const { Draggable } = await import('gsap/Draggable');
-				if (cancelled || !windowEl || !titlebarEl || !boundsEl) return;
-				gsap.registerPlugin(Draggable);
-				[draggableInstance] = Draggable.create(windowEl, {
-					type: 'x,y',
-					trigger: titlebarEl,
-					bounds: boundsEl,
-					inertia: false,
-					onPress: () => onFront()
-				});
-			}
+			[draggableInstance] = Draggable.create(windowEl, {
+				type: 'x,y',
+				trigger: titlebarEl,
+				bounds: boundsEl,
+				inertia: false,
+				onPress: () => onFront()
+			});
 
 			if (!reduceMotion) {
 				gsap.from(windowEl, {
@@ -163,7 +157,6 @@
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
-		if (!isDraggable) return;
 		const deltas: Record<string, [number, number]> = {
 			ArrowUp: [0, -STEP],
 			ArrowDown: [0, STEP],
@@ -187,7 +180,6 @@
 	<section
 		class="window {size}"
 		class:maximized
-		class:fixed-pos={!isDraggable}
 		bind:this={windowEl}
 		aria-label={title}
 		tabindex="0"
@@ -247,10 +239,6 @@
 
 	.window:active .titlebar {
 		cursor: grabbing;
-	}
-
-	.window.fixed-pos .titlebar {
-		cursor: default;
 	}
 
 	.content {
