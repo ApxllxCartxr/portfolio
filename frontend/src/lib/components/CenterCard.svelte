@@ -1,5 +1,11 @@
 <script lang="ts">
 	import { toggleSwap } from '$lib/theme.svelte';
+
+	interface Props {
+		maximized?: boolean;
+	}
+
+	let { maximized = false }: Props = $props();
 </script>
 
 <button
@@ -15,7 +21,7 @@
 	</span>
 </button>
 
-<div class="bio">
+<div class="bio" class:maximized>
 	<p>
 		Software developer, currently building full-stack systems as a dev intern at Picabord
 		Technologies — multi-tenant CRMs, RBAC, and everything underneath them.
@@ -30,7 +36,7 @@
 	</p>
 </div>
 
-<div class="links">
+<div class="links" class:maximized>
 	<a href="mailto:josephfernando05@proton.me">Email</a>
 	<a href="https://github.com/apxllxcartxr" target="_blank" rel="noreferrer">GitHub</a>
 </div>
@@ -48,6 +54,10 @@
 
 	.context {
 		opacity: 0.85;
+	}
+
+	.bio.maximized p:first-child {
+		font-weight: 700;
 	}
 
 	.links {
@@ -68,6 +78,10 @@
 	.links a:hover,
 	.links a:focus-visible {
 		color: var(--accent);
+	}
+
+	.links.maximized a {
+		font-weight: 700;
 	}
 
 	.name-card {

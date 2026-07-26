@@ -20,7 +20,9 @@
 		onClose: () => void;
 		onFront: () => void;
 		size?: 'primary' | 'compact';
-		scrollCue?: boolean;
+		maximized?: boolean;
+		windowEl?: HTMLElement;
+		contentEl?: HTMLElement;
 		children?: Snippet;
 	}
 
@@ -34,18 +36,31 @@
 		onClose,
 		onFront,
 		size = 'compact',
-		scrollCue = false,
+		maximized = false,
+		windowEl = $bindable(),
+		contentEl = $bindable(),
 		children
 	}: Props = $props();
 
-	let windowEl = $state<HTMLElement>();
 	let titlebarEl = $state<HTMLElement>();
-	let contentEl = $state<HTMLElement>();
-	let canScrollMore = $state(false);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let draggable: any;
+
+	export function snapToCenter() {
+		if (!draggable || !gsapRef || !windowEl) return;
+		gsapRef.set(windowEl, { x: 0, y: 0 });
+		draggable.update();
+	}
+
+	export function setDraggable(enabled: boolean) {
+		if (enabled) {
+			draggable?.enable();
+		} else {
+			draggable?.disable();
+		}
+	}
 
 	const STEP = 16;
 	const DESKTOP_QUERY = '(min-width: 701px)';
@@ -93,28 +108,6 @@
 		draggable?.kill();
 	});
 
-	// Overflow-aware scroll cue: only relevant when `scrollCue` is set (the
-	// center window), and only visible once content actually exceeds the
-	// scrollable area — a static hint would be misleading on short content.
-	$effect(() => {
-		if (!scrollCue || !browser || !contentEl) return;
-		const el = contentEl;
-
-		const update = () => {
-			canScrollMore = el.scrollHeight - el.clientHeight - el.scrollTop > 4;
-		};
-		update();
-
-		el.addEventListener('scroll', update);
-		const resizeObserver = new ResizeObserver(update);
-		resizeObserver.observe(el);
-
-		return () => {
-			el.removeEventListener('scroll', update);
-			resizeObserver.disconnect();
-		};
-	});
-
 	function nudge(dx: number, dy: number) {
 		if (!draggable || !gsapRef || !windowEl) return;
 		const nx = (draggable.x ?? 0) + dx;
@@ -146,6 +139,7 @@
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<section
 		class="window {size}"
+		class:maximized
 		bind:this={windowEl}
 		aria-label={title}
 		tabindex="0"
@@ -155,14 +149,9 @@
 		<header class="titlebar" bind:this={titlebarEl}>
 			<WindowControls {title} {onClose} />
 		</header>
-		<div class="content" class:scrollable={scrollCue} bind:this={contentEl}>
+		<div class="content" bind:this={contentEl}>
 			{@render children?.()}
 		</div>
-		{#if scrollCue && canScrollMore}
-			<div class="scroll-cue" aria-hidden="true">
-				<span class="chevron">⌄</span>
-			</div>
-		{/if}
 	</section>
 </div>
 
@@ -205,41 +194,15 @@
 		padding: 0.9rem;
 	}
 
-	.content.scrollable {
-		max-height: min(52vh, 420px);
-		overflow-y: auto;
-	}
-
-	.scroll-cue {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 0;
+	.window.maximized {
 		display: flex;
-		justify-content: center;
-		padding: 1.4rem 0 0.3rem;
-		background: linear-gradient(to bottom, transparent, var(--bg) 65%);
-		pointer-events: none;
+		flex-direction: column;
 	}
 
-	.chevron {
-		font-family: var(--font-mono);
-		font-size: 0.9rem;
-		line-height: 1;
-		color: var(--fg);
-		animation: bob 1.4s ease-in-out infinite;
-	}
-
-	@keyframes bob {
-		0%,
-		100% {
-			transform: translateY(0);
-			opacity: 0.55;
-		}
-		50% {
-			transform: translateY(3px);
-			opacity: 1;
-		}
+	.window.maximized .content {
+		flex: 1;
+		overflow-y: auto;
+		max-height: none;
 	}
 
 	@media (min-width: 701px) {
@@ -248,6 +211,14 @@
 			display: flex;
 			flex-direction: column;
 			justify-content: center;
+		}
+
+		/* Extra content (the resume section) lives inside the primary window's
+		   content but stays clipped out of view until the window maximizes —
+		   avoids a second scroll surface fighting the wheel-driven maximize. */
+		.window.primary:not(.maximized) .content {
+			max-height: min(52vh, 420px);
+			overflow: hidden;
 		}
 	}
 
@@ -269,12 +240,6 @@
 
 		.titlebar {
 			cursor: default;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.chevron {
-			animation: none;
 		}
 	}
 </style>

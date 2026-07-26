@@ -156,6 +156,7 @@
 :root {
 	--grid-line: color-mix(in srgb, var(--fg) 45%, transparent);
 	--focus-ring: var(--fg);
+	--card-bg: color-mix(in srgb, var(--bg) 90%, var(--fg) 10%);
 }
 
 html {
@@ -171,9 +172,9 @@ body {
 }
 
 /* Desktop windows are absolutely positioned and drag-bounded to the desktop
-   panel, so the page should never need to scroll at this width — clip any
-   sub-pixel rounding overflow instead of showing a scrollbar. Mobile is
-   excluded: there, windows stack as full-height cards taller than one
+   panel, and the center window's "maximize" is wheel-driven rather than a
+   real scroll, so the page itself should never scroll at this width. Mobile
+   is excluded: there, windows stack as full-height cards taller than one
    viewport, and that content needs normal document scroll to reach it. */
 @media (min-width: 701px) {
 	html,
