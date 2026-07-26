@@ -458,11 +458,12 @@
 			{#if cmrlsimOpen}
 				<Window
 					title="cmrlsim"
-					x={50}
-					y={88}
+					x={88}
+					y={34}
 					boundsEl={desktopEl}
 					zIndex={1000}
 					size="compact"
+					draggable={false}
 					onClose={() => (cmrlsimOpen = false)}
 					onFront={() => {}}
 				>

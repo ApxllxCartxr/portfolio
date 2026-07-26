@@ -23,6 +23,7 @@
 		onMaximize?: () => void;
 		size?: 'primary' | 'compact';
 		maximized?: boolean;
+		draggable?: boolean;
 		windowEl?: HTMLElement;
 		contentEl?: HTMLElement;
 		titlebarEl?: HTMLElement;
@@ -41,6 +42,7 @@
 		onMaximize,
 		size = 'compact',
 		maximized = false,
+		draggable: isDraggable = true,
 		windowEl = $bindable(),
 		contentEl = $bindable(),
 		titlebarEl = $bindable(),
@@ -49,21 +51,21 @@
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let draggable: any;
+	let draggableInstance: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let lenisRef: any;
 
 	export function snapToCenter() {
-		if (!draggable || !gsapRef || !windowEl) return;
+		if (!draggableInstance || !gsapRef || !windowEl) return;
 		gsapRef.set(windowEl, { x: 0, y: 0 });
-		draggable.update();
+		draggableInstance.update();
 	}
 
 	export function setDraggable(enabled: boolean) {
 		if (enabled) {
-			draggable?.enable();
+			draggableInstance?.enable();
 		} else {
-			draggable?.disable();
+			draggableInstance?.disable();
 		}
 	}
 
@@ -79,18 +81,22 @@
 			if (!isDesktop) return;
 
 			const { gsap } = await import('gsap');
-			const { Draggable } = await import('gsap/Draggable');
 			if (cancelled || !windowEl || !titlebarEl || !boundsEl) return;
 
-			gsap.registerPlugin(Draggable);
 			gsapRef = gsap;
-			[draggable] = Draggable.create(windowEl, {
-				type: 'x,y',
-				trigger: titlebarEl,
-				bounds: boundsEl,
-				inertia: false,
-				onPress: () => onFront()
-			});
+
+			if (isDraggable) {
+				const { Draggable } = await import('gsap/Draggable');
+				if (cancelled || !windowEl || !titlebarEl || !boundsEl) return;
+				gsap.registerPlugin(Draggable);
+				[draggableInstance] = Draggable.create(windowEl, {
+					type: 'x,y',
+					trigger: titlebarEl,
+					bounds: boundsEl,
+					inertia: false,
+					onPress: () => onFront()
+				});
+			}
 
 			if (!reduceMotion) {
 				gsap.from(windowEl, {
@@ -109,7 +115,7 @@
 	});
 
 	onDestroy(() => {
-		draggable?.kill();
+		draggableInstance?.kill();
 	});
 
 	// Lenis smooths the maximized window's own content scroll (Experience/
@@ -149,14 +155,15 @@
 	});
 
 	function nudge(dx: number, dy: number) {
-		if (!draggable || !gsapRef || !windowEl) return;
-		const nx = (draggable.x ?? 0) + dx;
-		const ny = (draggable.y ?? 0) + dy;
+		if (!draggableInstance || !gsapRef || !windowEl) return;
+		const nx = (draggableInstance.x ?? 0) + dx;
+		const ny = (draggableInstance.y ?? 0) + dy;
 		gsapRef.set(windowEl, { x: nx, y: ny });
-		draggable.update();
+		draggableInstance.update();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
+		if (!isDraggable) return;
 		const deltas: Record<string, [number, number]> = {
 			ArrowUp: [0, -STEP],
 			ArrowDown: [0, STEP],
@@ -180,6 +187,7 @@
 	<section
 		class="window {size}"
 		class:maximized
+		class:fixed-pos={!isDraggable}
 		bind:this={windowEl}
 		aria-label={title}
 		tabindex="0"
@@ -239,6 +247,10 @@
 
 	.window:active .titlebar {
 		cursor: grabbing;
+	}
+
+	.window.fixed-pos .titlebar {
+		cursor: default;
 	}
 
 	.content {
