@@ -10,9 +10,10 @@
 
 	interface Props {
 		maximized?: boolean;
+		onOpenDemo?: (id: string) => void;
 	}
 
-	let { maximized = false }: Props = $props();
+	let { maximized = false, onOpenDemo }: Props = $props();
 </script>
 
 <section class="resume" class:maximized>
@@ -32,7 +33,19 @@
 	<h2>Projects</h2>
 	{#each projects as project (project.name)}
 		<article class="entry">
-			<h3>{project.name}</h3>
+			<h3>
+				{#if project.demoId}
+					<button
+						type="button"
+						class="demo-trigger"
+						onclick={() => onOpenDemo?.(project.demoId ?? '')}
+					>
+						{project.name}
+					</button>
+				{:else}
+					{project.name}
+				{/if}
+			</h3>
 			<ul>
 				{#each project.bullets as bullet (bullet)}
 					<li>{bullet}</li>
@@ -78,6 +91,25 @@
 		font-size: 1.3rem;
 		font-weight: 600;
 		margin: 0 0 0.3rem;
+	}
+
+	.demo-trigger {
+		font: inherit;
+		color: inherit;
+		background: none;
+		border: none;
+		padding: 0.1rem 0.35rem;
+		margin: 0 0 0 -0.35rem;
+		border-radius: 3px;
+		cursor: pointer;
+		text-align: left;
+		transition: background-color 0.15s ease;
+	}
+
+	.demo-trigger:hover,
+	.demo-trigger:focus-visible {
+		background: color-mix(in srgb, var(--fg) 10%, transparent);
+		outline: none;
 	}
 
 	.meta {
