@@ -171,13 +171,16 @@ body {
 }
 
 /* Desktop windows are absolutely positioned and drag-bounded to the desktop
-   panel, and the center window's "maximize" is wheel-driven rather than a
-   real scroll, so the page itself should never scroll at this width. Mobile
-   is excluded: there, windows stack as full-height cards taller than one
-   viewport, and that content needs normal document scroll to reach it. */
+   panel, and the maximize animations are wheel/button-driven rather than a
+   real scroll, so the page itself should never scroll at this width — but
+   only on the desktop-shell homepage (`html.desktop-shell`, toggled from
+   `+page.svelte`). Other routes (e.g. /blog) need normal document scroll.
+   Mobile is excluded outright: there, windows stack as full-height cards
+   taller than one viewport, and that content needs normal document scroll
+   to reach it. */
 @media (min-width: 701px) {
-	html,
-	body {
+	html.desktop-shell,
+	html.desktop-shell body {
 		height: 100%;
 		overflow: hidden;
 	}

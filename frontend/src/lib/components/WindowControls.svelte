@@ -1,22 +1,33 @@
 <!--
 	Windows-95-style title bar controls: minimize / maximize / close, right
-	aligned. Only close is wired up — windows stay draggable-but-not-resizable,
-	so minimize/maximize render as disabled (visually present, not actionable).
+	aligned. Close is always wired up. Maximize is only actionable when a
+	window opts in via `onMaximize` (windows stay draggable-but-not-resizable
+	otherwise, so it renders disabled — visually present, not actionable).
+	Minimize is never wired up.
 -->
 <script lang="ts">
 	interface Props {
 		title: string;
 		onClose: () => void;
+		onMaximize?: () => void;
+		maximized?: boolean;
 	}
 
-	let { title, onClose }: Props = $props();
+	let { title, onClose, onMaximize, maximized = false }: Props = $props();
 </script>
 
 <div class="controls">
 	<button type="button" class="btn" disabled aria-label={`Minimize ${title} window`}>
 		<span class="glyph glyph--minimize"></span>
 	</button>
-	<button type="button" class="btn" disabled aria-label={`Maximize ${title} window`}>
+	<button
+		type="button"
+		class="btn"
+		class:btn--active={onMaximize}
+		disabled={!onMaximize}
+		onclick={onMaximize}
+		aria-label={`${maximized ? 'Restore' : 'Maximize'} ${title} window`}
+	>
 		<span class="glyph glyph--maximize"></span>
 	</button>
 	<button
@@ -44,7 +55,10 @@
 		justify-content: center;
 		border: 1.5px solid transparent;
 		background: none;
-		color: var(--bg);
+		/* Inherited from the titlebar (see Window.svelte) — fades opposite the
+		   titlebar's own background so the glyphs stay legible as the whole
+		   bar fades from solid --fg toward --bg. */
+		color: color-mix(in srgb, var(--bg) calc(var(--win-chrome, 1) * 100%), var(--fg));
 		padding: 0;
 		line-height: 1;
 	}
@@ -53,12 +67,15 @@
 		opacity: 0.5;
 	}
 
-	.btn--close {
+	.btn--close,
+	.btn--active {
 		cursor: pointer;
 	}
 
 	.btn--close:hover,
-	.btn--close:focus-visible {
+	.btn--close:focus-visible,
+	.btn--active:hover,
+	.btn--active:focus-visible {
 		background: var(--bg);
 		color: var(--fg);
 	}

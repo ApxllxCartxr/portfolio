@@ -20,6 +20,7 @@
 		zIndex: number;
 		onClose: () => void;
 		onFront: () => void;
+		onMaximize?: () => void;
 		size?: 'primary' | 'compact';
 		maximized?: boolean;
 		windowEl?: HTMLElement;
@@ -37,6 +38,7 @@
 		zIndex,
 		onClose,
 		onFront,
+		onMaximize,
 		size = 'compact',
 		maximized = false,
 		windowEl = $bindable(),
@@ -185,7 +187,7 @@
 		onpointerdown={onFront}
 	>
 		<header class="titlebar" bind:this={titlebarEl}>
-			<WindowControls {title} {onClose} />
+			<WindowControls {title} {onClose} {onMaximize} {maximized} />
 		</header>
 		<div class="content" bind:this={contentEl}>
 			<!-- Single wrapper so Lenis (below) has one content element to
@@ -225,7 +227,11 @@
 		display: flex;
 		align-items: center;
 		padding: 0.5rem 0.6rem;
-		background: var(--fg);
+		/* Fades in lockstep with the border (--win-chrome) so the titlebar
+		   blends into the card instead of reading as a leftover solid bar once
+		   the border around it has faded away — see WindowControls.svelte for
+		   the matching icon-color fade that keeps the buttons legible. */
+		background: color-mix(in srgb, var(--fg) calc(var(--win-chrome, 1) * 100%), var(--bg));
 		cursor: grab;
 		user-select: none;
 		-webkit-user-select: none;
@@ -248,10 +254,18 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		justify-content: safe center;
 		overflow-y: auto;
 		max-height: none;
 		scrollbar-width: none;
+	}
+
+	/* Auto margins center short content vertically (nicer than pinned-to-top)
+	   but collapse to 0 once content overflows, so long content always starts
+	   at the top and stays fully reachable by scrolling — unlike
+	   `justify-content: center`, which would clip the overflow at both ends
+	   with no way to scroll to the clipped part. */
+	.window.maximized .content > .content-inner {
+		margin: auto 0;
 	}
 
 	.window.maximized .content::-webkit-scrollbar {
@@ -259,7 +273,7 @@
 	}
 
 	@media (min-width: 701px) {
-		.window.compact .content {
+		.window.compact:not(.maximized) .content {
 			min-height: 11rem;
 			display: flex;
 			flex-direction: column;
