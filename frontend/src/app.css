@@ -159,13 +159,7 @@
 }
 
 html {
-	background-color: var(--bg);
-	/* Every theme pairs its bg/fg with a pale "paper" tone (see THEME TOKENS
-	   above), so a subtle grain reads consistently across all of them, not
-	   just arch-paper. */
-	background-image: url('/textures/paper-noise.svg');
-	background-repeat: repeat;
-	background-blend-mode: overlay;
+	background: var(--bg);
 	color: var(--fg);
 	font-family: var(--font-body);
 	-webkit-font-smoothing: antialiased;
