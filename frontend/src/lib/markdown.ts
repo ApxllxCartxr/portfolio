@@ -1,6 +1,8 @@
 import { marked } from 'marked';
-import sanitizeHtml from 'sanitize-html';
+import { FilterXSS } from 'xss';
+
+const sanitizer = new FilterXSS({ stripIgnoreTag: true, stripIgnoreTagBody: ['script'] });
 
 export function renderMarkdown(source: string): string {
-	return sanitizeHtml(marked.parse(source, { async: false }));
+	return sanitizer.process(marked.parse(source, { async: false }));
 }
