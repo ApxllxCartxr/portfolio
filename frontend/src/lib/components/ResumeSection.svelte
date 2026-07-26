@@ -49,8 +49,7 @@
 
 <style>
 	.resume {
-		max-width: 840px;
-		margin: 3rem auto 0;
+		margin: 3rem 0 0;
 		padding: 2rem 0 1rem;
 		border-top: 1px solid var(--fg);
 	}

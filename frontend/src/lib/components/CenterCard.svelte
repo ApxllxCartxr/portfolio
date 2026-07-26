@@ -40,6 +40,10 @@
 	<div class="links" class:maximized>
 		<a href="mailto:josephfernando05@proton.me">Email</a>
 		<a href="https://github.com/apxllxcartxr" target="_blank" rel="noreferrer">GitHub</a>
+		<a href="https://www.linkedin.com/in/joseph-fernando05/" target="_blank" rel="noreferrer"
+			>LinkedIn</a
+		>
+		<a href="https://leetcode.com/u/apxllxcartxr/" target="_blank" rel="noreferrer">LeetCode</a>
 	</div>
 </div>
 
@@ -74,6 +78,7 @@
 
 	.links {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 1rem;
 		margin-top: 1.1rem;
 		padding-top: 0.8rem;
