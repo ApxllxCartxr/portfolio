@@ -23,6 +23,14 @@
 		onMaximize?: () => void;
 		size?: 'primary' | 'compact';
 		maximized?: boolean;
+		// While maximizing/maximized, the anchor's own centering transform must
+		// be neutralized so it doesn't become the containing block for the
+		// window's `position: fixed` (see +page.svelte's render()/renderBlog()).
+		// This has to live in the same reactive style string as x/y/order/
+		// zIndex below — setting it imperatively via `anchorEl.style.transform`
+		// from +page.svelte gets silently wiped the next time any of those
+		// values change and Svelte re-renders this attribute from scratch.
+		anchorFixed?: boolean;
 		windowEl?: HTMLElement;
 		contentEl?: HTMLElement;
 		titlebarEl?: HTMLElement;
@@ -41,6 +49,7 @@
 		onMaximize,
 		size = 'compact',
 		maximized = false,
+		anchorFixed = false,
 		windowEl = $bindable(),
 		contentEl = $bindable(),
 		titlebarEl = $bindable(),
@@ -64,6 +73,18 @@
 			draggableInstance?.enable();
 		} else {
 			draggableInstance?.disable();
+		}
+	}
+
+	// Lets +page.svelte forward off-card wheel scrolling into this window's
+	// content with the same Lenis easing as scrolling directly over the card,
+	// instead of a raw scrollTop jump. Falls back to a direct scrollTop nudge
+	// if Lenis hasn't mounted yet (not maximized, or still loading).
+	export function scrollContentBy(delta: number) {
+		if (lenisRef && contentEl) {
+			lenisRef.scrollTo(lenisRef.scroll + delta, { immediate: false });
+		} else if (contentEl) {
+			contentEl.scrollTop += delta;
 		}
 	}
 
@@ -171,7 +192,10 @@
 	}
 </script>
 
-<div class="anchor" style={`left: ${x}%; top: ${y}%; --order: ${order}; z-index: ${zIndex};`}>
+<div
+	class="anchor"
+	style={`left: ${x}%; top: ${y}%; --order: ${order}; z-index: ${zIndex};${anchorFixed ? ' transform: none;' : ''}`}
+>
 	<!-- Custom draggable window widget: focusable + keyboard-nudgeable as a
 	     keyboard-accessible alternative to mouse drag, so it intentionally
 	     carries tabindex and key/pointer handlers despite being a <section>. -->

@@ -89,6 +89,11 @@
 	// snap), or the center window's own internal content once maximized.
 	let target = 0;
 	const driver = { p: 0 };
+	// Passed to the Info/Blog Window's own `anchorFixed` prop while
+	// maximizing/maximized — see the comment on that prop in Window.svelte for
+	// why this can't be an imperative `anchorEl.style.transform` mutation.
+	let centerAnchorFixed = $state(false);
+	let blogAnchorFixed = $state(false);
 	let startRect: DOMRect | null = null;
 	let startX = 0;
 	let startY = 0;
@@ -116,12 +121,11 @@
 			!blogWindowEl
 		)
 			return;
-		const anchorEl = centerWindowEl.parentElement as HTMLElement | null;
 		const fade = 1 - Math.min(p / 0.3, 1);
 
 		if (p <= 0) {
 			gsapRef.set(centerWindowEl, { clearProps: 'position,left,top,width,height,zIndex' });
-			if (anchorEl) anchorEl.style.transform = '';
+			centerAnchorFixed = false;
 			if (growEls) for (const { el } of growEls) el.style.fontSize = '';
 			desktopEl?.style.removeProperty('--chrome');
 			centerWindowEl.style.removeProperty('--win-chrome');
@@ -156,7 +160,7 @@
 			}
 			if (!gridEl) gridEl = desktopEl?.querySelector<HTMLElement>('.grid-layer') ?? null;
 			if (!scrollCueEl) scrollCueEl = centerWindowEl.querySelector<HTMLElement>('.scroll-cue');
-			if (anchorEl) anchorEl.style.transform = 'none';
+			centerAnchorFixed = true;
 
 			// Target: a centered portrait card, not edge-to-edge fullscreen.
 			const targetWidth = Math.min(1000, window.innerWidth * 0.94);
@@ -240,11 +244,10 @@
 
 	function renderBlog(p: number) {
 		if (!gsapRef || !blogWindowEl) return;
-		const anchorEl = blogWindowEl.parentElement as HTMLElement | null;
 
 		if (p <= 0) {
 			gsapRef.set(blogWindowEl, { clearProps: 'position,left,top,width,height,zIndex' });
-			if (anchorEl) anchorEl.style.transform = '';
+			blogAnchorFixed = false;
 			blogWindowInstance?.setDraggable(true);
 			blogStartRect = null;
 		} else {
@@ -253,7 +256,7 @@
 				blogStartX = gsapRef.getProperty(blogWindowEl, 'x') || 0;
 				blogStartY = gsapRef.getProperty(blogWindowEl, 'y') || 0;
 			}
-			if (anchorEl) anchorEl.style.transform = 'none';
+			blogAnchorFixed = true;
 
 			// Same target box as Info's maximize, for a consistent maximized shape.
 			const targetWidth = Math.min(1000, window.innerWidth * 0.94);
@@ -365,9 +368,10 @@
 			// it — forward the delta manually so wheeling anywhere on the page
 			// scrolls the maximized window, not just the card itself.
 			if ((target >= 1 && event.deltaY > 0) || (target >= 1 && event.deltaY < 0 && !atTop)) {
-				if (centerContentEl && !centerContentEl.contains(event.target as Node)) {
+				const overContent = event.target instanceof Node && centerContentEl?.contains(event.target);
+				if (!overContent) {
 					event.preventDefault();
-					centerContentEl.scrollTop += event.deltaY;
+					centerWindowInstance?.scrollContentBy(event.deltaY);
 				}
 				return;
 			}
@@ -464,6 +468,7 @@
 					onMaximize={toggleInfoMaximize}
 					size="primary"
 					{maximized}
+					anchorFixed={centerAnchorFixed}
 					bind:windowEl={centerWindowEl}
 					bind:contentEl={centerContentEl}
 					bind:titlebarEl={centerTitlebarEl}
@@ -538,6 +543,7 @@
 					onFront={() => bringToFront('blog')}
 					onMaximize={toggleBlogMaximize}
 					maximized={blogMaximized}
+					anchorFixed={blogAnchorFixed}
 					bind:windowEl={blogWindowEl}
 					bind:this={blogWindowInstance}
 				>
