@@ -6,9 +6,10 @@
 	import ClockCard from '$lib/components/ClockCard.svelte';
 	import CenterCard from '$lib/components/CenterCard.svelte';
 	import ResumeSection from '$lib/components/ResumeSection.svelte';
+	import NowPlayingCard from '$lib/components/NowPlayingCard.svelte';
 	import { DESKTOP_QUERY } from '$lib/breakpoints';
 
-	const WINDOW_IDS = ['weather', 'center', 'date'] as const;
+	const WINDOW_IDS = ['weather', 'center', 'date', 'nowPlaying'] as const;
 	type WindowId = (typeof WINDOW_IDS)[number];
 
 	// Wheel-distance (px-equivalent of accumulated deltaY) to go from compact
@@ -21,15 +22,17 @@
 	let centerContentEl = $state<HTMLElement>();
 	let centerTitlebarEl = $state<HTMLElement>();
 	let dateWindowEl = $state<HTMLElement>();
+	let nowPlayingWindowEl = $state<HTMLElement>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let centerWindowInstance: any = $state();
 	let maximized = $state(false);
 	let openWindows = $state<Record<WindowId, boolean>>({
 		weather: true,
 		center: true,
-		date: true
+		date: true,
+		nowPlaying: true
 	});
-	let zOrder = $state<WindowId[]>(['weather', 'center', 'date']);
+	let zOrder = $state<WindowId[]>(['weather', 'center', 'date', 'nowPlaying']);
 
 	function zIndexOf(id: WindowId) {
 		return zOrder.indexOf(id) + 1;
@@ -76,7 +79,8 @@
 	}
 
 	function render(p: number) {
-		if (!gsapRef || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
+		if (!gsapRef || !centerWindowEl || !weatherWindowEl || !dateWindowEl || !nowPlayingWindowEl)
+			return;
 		const anchorEl = centerWindowEl.parentElement as HTMLElement | null;
 		const fade = 1 - Math.min(p / 0.3, 1);
 
@@ -152,9 +156,12 @@
 			centerWindowInstance?.setDraggable(false);
 		}
 
-		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl, scrollCueEl], {
-			autoAlpha: fade
-		});
+		gsapRef.set(
+			[weatherWindowEl, dateWindowEl, nowPlayingWindowEl, centerTitlebarEl, scrollCueEl],
+			{
+				autoAlpha: fade
+			}
+		);
 		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
 
 		// Drive `maximized` from the same per-frame call that renders the
@@ -216,7 +223,8 @@
 	});
 
 	$effect(() => {
-		if (!browser || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
+		if (!browser || !centerWindowEl || !weatherWindowEl || !dateWindowEl || !nowPlayingWindowEl)
+			return;
 
 		let cancelled = false;
 
@@ -330,6 +338,22 @@
 					bind:windowEl={dateWindowEl}
 				>
 					<ClockCard />
+				</Window>
+			{/if}
+
+			{#if openWindows.nowPlaying}
+				<Window
+					title="Now Playing"
+					x={91}
+					y={84}
+					order={4}
+					boundsEl={desktopEl}
+					zIndex={zIndexOf('nowPlaying')}
+					onClose={() => closeWindow('nowPlaying')}
+					onFront={() => bringToFront('nowPlaying')}
+					bind:windowEl={nowPlayingWindowEl}
+				>
+					<NowPlayingCard />
 				</Window>
 			{/if}
 		{/if}
