@@ -66,7 +66,13 @@
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let flipRef: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let smoothTween: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let flipTween: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let pendingFlipState: any = null;
 
 	function clamp01(v: number) {
 		return Math.max(0, Math.min(1, v));
@@ -136,7 +142,19 @@
 
 		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl], { autoAlpha: fade });
 		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
-		maximized = p >= 0.999;
+
+		// The name/bio layout flips between a stacked column and a two-column
+		// row at this threshold — flex-direction itself can't be transitioned,
+		// so capture a Flip "before" snapshot right here (current DOM, before
+		// the class change) whenever the boolean is about to change; the
+		// $effect below plays the actual animation once Svelte applies the
+		// new class.
+		const nextMaximized = p >= 0.999;
+		if (nextMaximized !== maximized && flipRef && centerWindowEl) {
+			const flipTargets = centerWindowEl.querySelectorAll('.name-card, .info');
+			if (flipTargets.length) pendingFlipState = flipRef.getState(flipTargets);
+		}
+		maximized = nextMaximized;
 	}
 
 	function setTarget(next: number) {
@@ -151,6 +169,21 @@
 			onUpdate: () => render(driver.p)
 		});
 	}
+
+	// Plays the Flip animation captured in render() as soon as Svelte has
+	// actually applied the new `maximized` class to the DOM.
+	$effect(() => {
+		void maximized;
+		if (!pendingFlipState || !flipRef) return;
+		const state = pendingFlipState;
+		pendingFlipState = null;
+		flipTween?.kill();
+		flipTween = flipRef.from(state, {
+			duration: 0.45,
+			ease: 'power2.inOut',
+			absolute: true
+		});
+	});
 
 	$effect(() => {
 		if (!browser || !loaded || !centerWindowEl || !weatherWindowEl || !dateWindowEl) return;
@@ -175,21 +208,24 @@
 		}
 
 		(async () => {
-			const { gsap } = await import('gsap');
+			const [{ gsap }, { Flip }] = await Promise.all([import('gsap'), import('gsap/Flip')]);
 			if (cancelled) return;
+			gsap.registerPlugin(Flip);
 			gsapRef = gsap;
 
 			const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
 			const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 			if (isDesktop && reduceMotion) {
-				// No motion: skip the wheel-jack entirely and land straight on
-				// the maximized view so the resume content stays reachable.
+				// No motion: skip the wheel-jack (and the Flip layout animation,
+				// left unregistered) entirely and land straight on the maximized
+				// view so the resume content stays reachable.
 				target = 1;
 				driver.p = 1;
 				render(1);
 				return;
 			}
 
+			flipRef = Flip;
 			window.addEventListener('wheel', onWheel, { passive: false });
 			window.addEventListener('resize', onResize);
 		})();
