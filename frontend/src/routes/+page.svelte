@@ -544,6 +544,7 @@
 					onMaximize={toggleBlogMaximize}
 					maximized={blogMaximized}
 					anchorFixed={blogAnchorFixed}
+					transitionName="blog-window"
 					bind:windowEl={blogWindowEl}
 					bind:this={blogWindowInstance}
 				>

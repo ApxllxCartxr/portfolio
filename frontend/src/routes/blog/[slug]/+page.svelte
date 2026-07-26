@@ -11,57 +11,35 @@
 	<title>{data.post.title} — Joseph Fernando</title>
 </svelte:head>
 
-<main class="wrap">
-	<nav class="breadcrumb" aria-label="Breadcrumb">
-		<a href={resolve('/')}>Home</a>
-		<span aria-hidden="true">/</span>
-		<a href={resolve('/blog')}>Blog</a>
-	</nav>
+<a class="back" href={resolve('/blog')}>&larr; All posts</a>
 
-	<h1>{data.post.title}</h1>
-	<time datetime={data.post.created_at}
-		>{new Date(data.post.created_at).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		})}</time
-	>
+<h1>{data.post.title}</h1>
+<time datetime={data.post.created_at}
+	>{new Date(data.post.created_at).toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	})}</time
+>
 
-	<div class="content">
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -- html is DOMPurify-sanitized in renderMarkdown() -->
-		{@html html}
-	</div>
-</main>
+<div class="content">
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -- html is DOMPurify-sanitized in renderMarkdown() -->
+	{@html html}
+</div>
 
 <style>
-	.wrap {
-		max-width: 720px;
-		margin: 0 auto;
-		padding: 3rem 1.25rem 5rem;
-		color: var(--fg);
-	}
-
-	.breadcrumb {
-		display: flex;
-		align-items: center;
-		gap: 0.4rem;
+	.back {
+		display: inline-block;
 		font-family: var(--font-mono);
 		font-size: 0.8rem;
-		margin-bottom: 2rem;
-	}
-
-	.breadcrumb span {
-		opacity: 0.5;
-	}
-
-	.breadcrumb a {
 		color: inherit;
 		text-decoration: underline;
 		text-underline-offset: 3px;
+		margin-bottom: 2rem;
 	}
 
-	.breadcrumb a:hover,
-	.breadcrumb a:focus-visible {
+	.back:hover,
+	.back:focus-visible {
 		color: var(--accent);
 	}
 
