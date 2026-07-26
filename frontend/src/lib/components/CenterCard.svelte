@@ -45,39 +45,24 @@
 	</div>
 </div>
 
+<div class="scroll-cue" class:maximized>
+	<span>Scroll to see more</span>
+	<span class="chevron" aria-hidden="true">↓</span>
+</div>
+
 <style>
 	.layout {
 		display: flex;
 		flex-direction: column;
 	}
 
-	.layout.maximized {
-		flex-direction: row;
-		align-items: flex-start;
-		gap: 2.5rem;
-	}
-
-	.layout.maximized .name-card {
-		width: auto;
-		flex-shrink: 0;
-	}
-
-	.layout.maximized .info {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.layout.maximized .bio {
-		margin-top: 0;
-	}
-
 	.bio {
 		display: flex;
 		flex-direction: column;
-		gap: 0.7rem;
-		margin-top: 1.1rem;
+		gap: 0.8rem;
+		margin-top: 2rem;
 		font-family: var(--font-body);
-		font-size: 0.92rem;
+		font-size: 1.15rem;
 		line-height: 1.5;
 	}
 
@@ -134,12 +119,12 @@
 
 	.intro {
 		font-family: var(--font-hand);
-		font-size: 1.4rem;
+		font-size: 1.9rem;
 	}
 
 	.name {
 		font-family: var(--font-display);
-		font-size: clamp(1.6rem, 6vw, 2.1rem);
+		font-size: clamp(2.75rem, 9vw, 4.5rem);
 		line-height: 1.05;
 		font-weight: 700;
 	}
@@ -147,5 +132,48 @@
 	.accent {
 		color: var(--accent);
 		font-family: var(--font-redaction-clear);
+	}
+
+	.scroll-cue {
+		display: none;
+	}
+
+	@media (min-width: 701px) {
+		.bio:not(.maximized),
+		.links:not(.maximized) {
+			display: none;
+		}
+
+		.scroll-cue:not(.maximized) {
+			display: flex;
+			align-items: center;
+			gap: 0.4rem;
+			position: absolute;
+			left: 50%;
+			bottom: 1.1rem;
+			transform: translateX(-50%);
+			font-family: var(--font-mono);
+			font-size: 0.7rem;
+			letter-spacing: 0.06em;
+			text-transform: uppercase;
+			opacity: 0.65;
+			white-space: nowrap;
+			pointer-events: none;
+		}
+
+		.scroll-cue .chevron {
+			display: inline-block;
+			animation: cue-bounce 1.6s ease-in-out infinite;
+		}
+	}
+
+	@keyframes cue-bounce {
+		0%,
+		100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(4px);
+		}
 	}
 </style>

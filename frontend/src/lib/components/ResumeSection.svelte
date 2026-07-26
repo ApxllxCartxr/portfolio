@@ -7,9 +7,15 @@
 -->
 <script lang="ts">
 	import { experience, projects, skills } from '$lib/resume-data';
+
+	interface Props {
+		maximized?: boolean;
+	}
+
+	let { maximized = false }: Props = $props();
 </script>
 
-<section class="resume">
+<section class="resume" class:maximized>
 	<h2>Experience</h2>
 	{#each experience as job (job.company)}
 		<article class="entry">
@@ -36,10 +42,9 @@
 	{/each}
 
 	<h2>Skills</h2>
-	<p class="skills">
-		{#each skills as skill, i (skill)}<span class="pill">{skill}</span
-			>{#if i < skills.length - 1}<span class="dot">·</span>{/if}{/each}
-	</p>
+	<div class="skills">
+		{#each skills as skill (skill)}<span class="pill">{skill}</span>{/each}
+	</div>
 </section>
 
 <style>
@@ -52,7 +57,7 @@
 
 	h2 {
 		font-family: var(--font-title);
-		font-size: 1.5rem;
+		font-size: 1.85rem;
 		font-weight: 600;
 		margin: 2.25rem 0 1.1rem;
 	}
@@ -71,7 +76,7 @@
 
 	.entry h3 {
 		font-family: var(--font-title);
-		font-size: 1.15rem;
+		font-size: 1.3rem;
 		font-weight: 600;
 		margin: 0 0 0.3rem;
 	}
@@ -89,22 +94,33 @@
 		flex-direction: column;
 		gap: 0.5rem;
 		font-family: var(--font-body);
-		font-size: 1rem;
+		font-size: 1.05rem;
 		line-height: 1.55;
 		padding-left: 1.1rem;
 		margin: 0;
 	}
 
 	.skills {
-		font-family: var(--font-mono);
-		font-size: 0.88rem;
-		line-height: 1.9;
-		opacity: 0.8;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.45rem;
 		margin: 0;
 	}
 
-	.dot {
-		opacity: 0.4;
-		margin: 0 0.35em;
+	.pill {
+		background: var(--fg);
+		color: var(--bg);
+		font-family: var(--font-mono);
+		font-size: 0.72rem;
+		line-height: 1;
+		padding: 0.3rem 0.7rem;
+		border-radius: 999px;
+		white-space: nowrap;
+	}
+
+	@media (min-width: 701px) {
+		.resume:not(.maximized) {
+			display: none;
+		}
 	}
 </style>

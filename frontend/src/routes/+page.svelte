@@ -5,7 +5,6 @@
 	import WeatherCard from '$lib/components/WeatherCard.svelte';
 	import ClockCard from '$lib/components/ClockCard.svelte';
 	import CenterCard from '$lib/components/CenterCard.svelte';
-	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import ResumeSection from '$lib/components/ResumeSection.svelte';
 
 	const WINDOW_IDS = ['weather', 'center', 'date'] as const;
@@ -16,7 +15,7 @@
 	// card to fully maximized.
 	const MAXIMIZE_DISTANCE = 700;
 
-	let loaded = $state(false);
+	let loaded = $state(true);
 	let desktopEl = $state<HTMLDivElement>();
 	let weatherWindowEl = $state<HTMLElement>();
 	let centerWindowEl = $state<HTMLElement>();
@@ -61,18 +60,17 @@
 	let target = 0;
 	const driver = { p: 0 };
 	let startRect: DOMRect | null = null;
+	let startX = 0;
+	let startY = 0;
 	let growEls: { el: HTMLElement; startPx: number }[] | null = null;
 	let gridEl: HTMLElement | null = null;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let flipRef: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let smoothTween: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let flipTween: any;
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let pendingFlipState: any = null;
+	let revealTween: any;
+	let scrollCueEl: HTMLElement | null = null;
 
 	function clamp01(v: number) {
 		return Math.max(0, Math.min(1, v));
@@ -98,15 +96,26 @@
 			// descendant, trapping the maximized window inside the desktop
 			// panel instead of escaping to the viewport — neutralize it while
 			// animating.
-			if (!startRect) startRect = centerWindowEl.getBoundingClientRect();
+			if (!startRect) {
+				startRect = centerWindowEl.getBoundingClientRect();
+				// Draggable applies drag offset as a `transform: translate(x,y)`,
+				// entirely separate from the left/top we animate below — capture
+				// it once and ease it back to (0,0) in lockstep with `p`, so the
+				// card ends up exactly centered at p=1 regardless of wherever the
+				// user last dragged it (otherwise it grows "in place", offset by
+				// the drag amount).
+				startX = gsapRef.getProperty(centerWindowEl, 'x') || 0;
+				startY = gsapRef.getProperty(centerWindowEl, 'y') || 0;
+			}
 			if (!growEls) {
-				const els = centerWindowEl.querySelectorAll<HTMLElement>('.name, .bio p, .links a');
+				const els = centerWindowEl.querySelectorAll<HTMLElement>('.name');
 				growEls = Array.from(els).map((el) => ({
 					el,
 					startPx: parseFloat(getComputedStyle(el).fontSize)
 				}));
 			}
 			if (!gridEl) gridEl = desktopEl?.querySelector<HTMLElement>('.grid-layer') ?? null;
+			if (!scrollCueEl) scrollCueEl = centerWindowEl.querySelector<HTMLElement>('.scroll-cue');
 			if (anchorEl) anchorEl.style.transform = 'none';
 
 			// Target: a centered portrait card, not edge-to-edge fullscreen.
@@ -125,6 +134,8 @@
 				top,
 				width,
 				height,
+				x: startX * (1 - p),
+				y: startY * (1 - p),
 				zIndex: 999
 			});
 
@@ -140,21 +151,14 @@
 			centerWindowInstance?.setDraggable(false);
 		}
 
-		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl], { autoAlpha: fade });
+		gsapRef.set([weatherWindowEl, dateWindowEl, centerTitlebarEl, scrollCueEl], {
+			autoAlpha: fade
+		});
 		if (gridEl) gsapRef.set(gridEl, { autoAlpha: fade });
+	}
 
-		// The name/bio layout flips between a stacked column and a two-column
-		// row at this threshold — flex-direction itself can't be transitioned,
-		// so capture a Flip "before" snapshot right here (current DOM, before
-		// the class change) whenever the boolean is about to change; the
-		// $effect below plays the actual animation once Svelte applies the
-		// new class.
-		const nextMaximized = p >= 0.999;
-		if (nextMaximized !== maximized && flipRef && centerWindowEl) {
-			const flipTargets = centerWindowEl.querySelectorAll('.name-card, .info');
-			if (flipTargets.length) pendingFlipState = flipRef.getState(flipTargets);
-		}
-		maximized = nextMaximized;
+	function updateMaximized(next: boolean) {
+		maximized = next;
 	}
 
 	function setTarget(next: number) {
@@ -166,23 +170,45 @@
 			duration: 0.5,
 			ease: 'power3.out',
 			overwrite: 'auto',
-			onUpdate: () => render(driver.p)
+			onUpdate: () => render(driver.p),
+			onComplete: () => updateMaximized(driver.p >= 0.999)
 		});
 	}
 
-	// Plays the Flip animation captured in render() as soon as Svelte has
-	// actually applied the new `maximized` class to the DOM.
+	// Reveals the content that only exists once maximized: the bio/contact
+	// copy just does a plain fade (it's simple stacked text now, no layout
+	// change to animate), while the resume entries and skill pills still get
+	// a staggered rise-and-fade for a bit more polish further down the card.
 	$effect(() => {
 		void maximized;
-		if (!pendingFlipState || !flipRef) return;
-		const state = pendingFlipState;
-		pendingFlipState = null;
-		flipTween?.kill();
-		flipTween = flipRef.from(state, {
-			duration: 0.45,
-			ease: 'power2.inOut',
-			absolute: true
-		});
+		revealTween?.kill();
+		if (maximized && gsapRef && centerWindowEl) {
+			const bioEls = centerWindowEl.querySelectorAll<HTMLElement>('.bio, .links');
+			const resumeEls = centerWindowEl.querySelectorAll<HTMLElement>('.resume h2, .resume .entry');
+			const pillEls = centerWindowEl.querySelectorAll<HTMLElement>('.resume .pill');
+
+			const tl = gsapRef.timeline();
+			if (bioEls.length) {
+				tl.fromTo(bioEls, { opacity: 0 }, { opacity: 1, duration: 0.5, ease: 'power1.out' });
+			}
+			if (resumeEls.length) {
+				tl.fromTo(
+					resumeEls,
+					{ opacity: 0, y: 26 },
+					{ opacity: 1, y: 0, duration: 0.55, ease: 'power3.out', stagger: 0.07 },
+					'-=0.2'
+				);
+			}
+			if (pillEls.length) {
+				tl.fromTo(
+					pillEls,
+					{ opacity: 0, y: 10 },
+					{ opacity: 1, y: 0, duration: 0.35, ease: 'power3.out', stagger: 0.018 },
+					'-=0.25'
+				);
+			}
+			revealTween = tl;
+		}
 	});
 
 	$effect(() => {
@@ -208,24 +234,22 @@
 		}
 
 		(async () => {
-			const [{ gsap }, { Flip }] = await Promise.all([import('gsap'), import('gsap/Flip')]);
+			const { gsap } = await import('gsap');
 			if (cancelled) return;
-			gsap.registerPlugin(Flip);
 			gsapRef = gsap;
 
 			const isDesktop = window.matchMedia(DESKTOP_QUERY).matches;
 			const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 			if (isDesktop && reduceMotion) {
-				// No motion: skip the wheel-jack (and the Flip layout animation,
-				// left unregistered) entirely and land straight on the maximized
-				// view so the resume content stays reachable.
+				// No motion: skip the wheel-jack entirely and land straight on the
+				// maximized view so the resume content stays reachable.
 				target = 1;
 				driver.p = 1;
 				render(1);
+				updateMaximized(true);
 				return;
 			}
 
-			flipRef = Flip;
 			window.addEventListener('wheel', onWheel, { passive: false });
 			window.addEventListener('resize', onResize);
 		})();
@@ -242,8 +266,6 @@
 	<title>Joseph Fernando</title>
 	<meta name="description" content="Personal portfolio — a desktop-style homepage." />
 </svelte:head>
-
-<LoadingScreen onDone={() => (loaded = true)} />
 
 <main class="page">
 	<Desktop bind:desktopEl>
@@ -290,7 +312,7 @@
 					bind:this={centerWindowInstance}
 				>
 					<CenterCard {maximized} />
-					<ResumeSection />
+					<ResumeSection {maximized} />
 				</Window>
 			{/if}
 

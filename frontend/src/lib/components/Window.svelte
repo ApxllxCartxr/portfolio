@@ -268,9 +268,11 @@
 
 		/* Extra content (the resume section) lives inside the primary window's
 		   content but stays clipped out of view until the window maximizes —
-		   avoids a second scroll surface fighting the wheel-driven maximize. */
+		   avoids a second scroll surface fighting the wheel-driven maximize.
+		   Fixed (not max-) height so there's always room reserved below the
+		   tagline for CenterCard's bottom-pinned scroll cue. */
 		.window.primary:not(.maximized) .content {
-			max-height: min(52vh, 420px);
+			height: min(52vh, 420px);
 			overflow: hidden;
 		}
 	}
