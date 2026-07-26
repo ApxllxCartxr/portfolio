@@ -7,9 +7,13 @@
 	import CenterCard from '$lib/components/CenterCard.svelte';
 	import ResumeSection from '$lib/components/ResumeSection.svelte';
 	import NowPlayingCard from '$lib/components/NowPlayingCard.svelte';
+	import BlogCard from '$lib/components/BlogCard.svelte';
 	import { DESKTOP_QUERY } from '$lib/breakpoints';
+	import type { PageProps } from './$types';
 
-	const WINDOW_IDS = ['weather', 'center', 'date', 'nowPlaying'] as const;
+	let { data }: PageProps = $props();
+
+	const WINDOW_IDS = ['weather', 'center', 'date', 'nowPlaying', 'blog'] as const;
 	type WindowId = (typeof WINDOW_IDS)[number];
 
 	// Wheel-distance (px-equivalent of accumulated deltaY) to go from compact
@@ -23,16 +27,21 @@
 	let centerTitlebarEl = $state<HTMLElement>();
 	let dateWindowEl = $state<HTMLElement>();
 	let nowPlayingWindowEl = $state<HTMLElement>();
+	let blogWindowEl = $state<HTMLElement>();
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let centerWindowInstance: any = $state();
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let blogWindowInstance: any = $state();
 	let maximized = $state(false);
+	let blogMaximized = $state(false);
 	let openWindows = $state<Record<WindowId, boolean>>({
 		weather: true,
 		center: true,
 		date: true,
-		nowPlaying: true
+		nowPlaying: true,
+		blog: true
 	});
-	let zOrder = $state<WindowId[]>(['weather', 'center', 'date', 'nowPlaying']);
+	let zOrder = $state<WindowId[]>(['weather', 'center', 'date', 'nowPlaying', 'blog']);
 
 	function zIndexOf(id: WindowId) {
 		return zOrder.indexOf(id) + 1;
@@ -79,7 +88,14 @@
 	}
 
 	function render(p: number) {
-		if (!gsapRef || !centerWindowEl || !weatherWindowEl || !dateWindowEl || !nowPlayingWindowEl)
+		if (
+			!gsapRef ||
+			!centerWindowEl ||
+			!weatherWindowEl ||
+			!dateWindowEl ||
+			!nowPlayingWindowEl ||
+			!blogWindowEl
+		)
 			return;
 		const anchorEl = centerWindowEl.parentElement as HTMLElement | null;
 		const fade = 1 - Math.min(p / 0.3, 1);
@@ -157,7 +173,11 @@
 		}
 
 		gsapRef.set(
-			[weatherWindowEl, dateWindowEl, nowPlayingWindowEl, centerTitlebarEl, scrollCueEl],
+			// centerTitlebarEl is deliberately excluded — its maximize/restore
+			// button needs to stay visible and clickable while maximized, now
+			// that it's wired up (previously the whole chrome faded away since
+			// wheel-scroll-up was the only way back).
+			[weatherWindowEl, dateWindowEl, nowPlayingWindowEl, blogWindowEl, scrollCueEl],
 			{
 				autoAlpha: fade
 			}
@@ -183,6 +203,90 @@
 			overwrite: 'auto',
 			onUpdate: () => render(driver.p)
 		});
+	}
+
+	// Button-driven maximize for the Blog window — same fixed-position/size
+	// tween shape as Info's wheel-jack above, but triggered by a single click
+	// rather than a continuous wheel delta, so none of the wheel/scroll-cue/
+	// font-grow bookkeeping is needed. Unlike Info, nothing else on the
+	// desktop fades — the other windows, the grid, and Blog's own border all
+	// stay fully visible; only its position/size grows.
+	let blogTarget = 0;
+	const blogDriver = { p: 0 };
+	let blogStartRect: DOMRect | null = null;
+	let blogStartX = 0;
+	let blogStartY = 0;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let blogSmoothTween: any;
+
+	function renderBlog(p: number) {
+		if (!gsapRef || !blogWindowEl) return;
+		const anchorEl = blogWindowEl.parentElement as HTMLElement | null;
+
+		if (p <= 0) {
+			gsapRef.set(blogWindowEl, { clearProps: 'position,left,top,width,height,zIndex' });
+			if (anchorEl) anchorEl.style.transform = '';
+			blogWindowInstance?.setDraggable(true);
+			blogStartRect = null;
+		} else {
+			if (!blogStartRect) {
+				blogStartRect = blogWindowEl.getBoundingClientRect();
+				blogStartX = gsapRef.getProperty(blogWindowEl, 'x') || 0;
+				blogStartY = gsapRef.getProperty(blogWindowEl, 'y') || 0;
+			}
+			if (anchorEl) anchorEl.style.transform = 'none';
+
+			// Same target box as Info's maximize, for a consistent maximized shape.
+			const targetWidth = Math.min(1000, window.innerWidth * 0.94);
+			const targetHeight = Math.min(window.innerHeight * 0.92, 1000);
+			const targetLeft = (window.innerWidth - targetWidth) / 2;
+			const targetTop = (window.innerHeight - targetHeight) / 2;
+
+			const left = blogStartRect.left + (targetLeft - blogStartRect.left) * p;
+			const top = blogStartRect.top + (targetTop - blogStartRect.top) * p;
+			const width = blogStartRect.width + (targetWidth - blogStartRect.width) * p;
+			const height = blogStartRect.height + (targetHeight - blogStartRect.height) * p;
+			gsapRef.set(blogWindowEl, {
+				position: 'fixed',
+				left,
+				top,
+				width,
+				height,
+				x: blogStartX * (1 - p),
+				y: blogStartY * (1 - p),
+				zIndex: 999
+			});
+
+			blogWindowInstance?.setDraggable(false);
+		}
+
+		blogMaximized = p >= 0.999;
+	}
+
+	function setBlogTarget(next: number) {
+		blogTarget = clamp01(next);
+		if (!gsapRef) return;
+		blogSmoothTween?.kill();
+		blogSmoothTween = gsapRef.to(blogDriver, {
+			p: blogTarget,
+			duration: 0.5,
+			ease: 'power3.out',
+			overwrite: 'auto',
+			onUpdate: () => renderBlog(blogDriver.p)
+		});
+	}
+
+	// Only one window maximizes at a time — each toggle restores the other
+	// first (both transitions run concurrently as a cross-fade, which reads
+	// fine since they use the same easing/duration).
+	function toggleInfoMaximize() {
+		if (blogTarget > 0) setBlogTarget(0);
+		setTarget(target >= 0.999 ? 0 : 1);
+	}
+
+	function toggleBlogMaximize() {
+		if (target > 0) setTarget(0);
+		setBlogTarget(blogTarget >= 0.999 ? 0 : 1);
 	}
 
 	// Reveals the content that only exists once maximized: the bio/contact
@@ -230,6 +334,9 @@
 
 		function onWheel(event: WheelEvent) {
 			if (!window.matchMedia(DESKTOP_QUERY).matches) return;
+			// Only one window maximizes at a time — while Blog is maximized/
+			// maximizing, the wheel shouldn't also jack Info open.
+			if (blogTarget > 0) return;
 
 			const atTop = target >= 1 && (!centerContentEl || centerContentEl.scrollTop <= 0);
 			if (target >= 1 && event.deltaY > 0) return;
@@ -269,6 +376,17 @@
 			cancelled = true;
 			window.removeEventListener('wheel', onWheel);
 			window.removeEventListener('resize', onResize);
+		};
+	});
+
+	// Scopes app.css's desktop-width `overflow: hidden` (needed here since
+	// wheel/maximize replaces real scrolling) to this route only, so other
+	// routes (e.g. /blog) keep normal document scroll.
+	$effect(() => {
+		if (!browser) return;
+		document.documentElement.classList.add('desktop-shell');
+		return () => {
+			document.documentElement.classList.remove('desktop-shell');
 		};
 	});
 </script>
@@ -313,6 +431,7 @@
 					zIndex={zIndexOf('center')}
 					onClose={() => closeWindow('center')}
 					onFront={() => bringToFront('center')}
+					onMaximize={toggleInfoMaximize}
 					size="primary"
 					{maximized}
 					bind:windowEl={centerWindowEl}
@@ -354,6 +473,25 @@
 					bind:windowEl={nowPlayingWindowEl}
 				>
 					<NowPlayingCard />
+				</Window>
+			{/if}
+
+			{#if openWindows.blog}
+				<Window
+					title="Blog"
+					x={9}
+					y={84}
+					order={5}
+					boundsEl={desktopEl}
+					zIndex={zIndexOf('blog')}
+					onClose={() => closeWindow('blog')}
+					onFront={() => bringToFront('blog')}
+					onMaximize={toggleBlogMaximize}
+					maximized={blogMaximized}
+					bind:windowEl={blogWindowEl}
+					bind:this={blogWindowInstance}
+				>
+					<BlogCard post={data.latestPost} maximized={blogMaximized} />
 				</Window>
 			{/if}
 		{/if}
