@@ -8,6 +8,7 @@
 	import ResumeSection from '$lib/components/ResumeSection.svelte';
 	import NowPlayingCard from '$lib/components/NowPlayingCard.svelte';
 	import BlogCard from '$lib/components/BlogCard.svelte';
+	import CmrlsimDemo from '$lib/components/CmrlsimDemo.svelte';
 	import { DESKTOP_QUERY } from '$lib/breakpoints';
 	import type { PageProps } from './$types';
 
@@ -42,6 +43,16 @@
 		blog: true
 	});
 	let zOrder = $state<WindowId[]>(['weather', 'center', 'date', 'nowPlaying', 'blog']);
+
+	// Ephemeral project-demo popup — opened by clicking a project inside
+	// ResumeSection, independent of the persistent WINDOW_IDS/openWindows/
+	// zOrder system above (it's not part of "Restore windows"). Closes
+	// itself whenever the Info window leaves the maximized state, since
+	// the project it was opened from is no longer on screen.
+	let cmrlsimOpen = $state(false);
+	$effect(() => {
+		if (!maximized) cmrlsimOpen = false;
+	});
 
 	function zIndexOf(id: WindowId) {
 		return zOrder.indexOf(id) + 1;
@@ -440,7 +451,27 @@
 					bind:this={centerWindowInstance}
 				>
 					<CenterCard {maximized} />
-					<ResumeSection {maximized} />
+					<ResumeSection
+						{maximized}
+						onOpenDemo={(id) => {
+							if (id === 'cmrlsim') cmrlsimOpen = true;
+						}}
+					/>
+				</Window>
+			{/if}
+
+			{#if cmrlsimOpen}
+				<Window
+					title="cmrlsim"
+					x={88}
+					y={34}
+					boundsEl={desktopEl}
+					zIndex={1000}
+					size="compact"
+					onClose={() => (cmrlsimOpen = false)}
+					onFront={() => {}}
+				>
+					<CmrlsimDemo />
 				</Window>
 			{/if}
 

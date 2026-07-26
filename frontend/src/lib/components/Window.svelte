@@ -49,21 +49,21 @@
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let gsapRef: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let draggable: any;
+	let draggableInstance: any;
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	let lenisRef: any;
 
 	export function snapToCenter() {
-		if (!draggable || !gsapRef || !windowEl) return;
+		if (!draggableInstance || !gsapRef || !windowEl) return;
 		gsapRef.set(windowEl, { x: 0, y: 0 });
-		draggable.update();
+		draggableInstance.update();
 	}
 
 	export function setDraggable(enabled: boolean) {
 		if (enabled) {
-			draggable?.enable();
+			draggableInstance?.enable();
 		} else {
-			draggable?.disable();
+			draggableInstance?.disable();
 		}
 	}
 
@@ -84,7 +84,7 @@
 
 			gsap.registerPlugin(Draggable);
 			gsapRef = gsap;
-			[draggable] = Draggable.create(windowEl, {
+			[draggableInstance] = Draggable.create(windowEl, {
 				type: 'x,y',
 				trigger: titlebarEl,
 				bounds: boundsEl,
@@ -109,7 +109,7 @@
 	});
 
 	onDestroy(() => {
-		draggable?.kill();
+		draggableInstance?.kill();
 	});
 
 	// Lenis smooths the maximized window's own content scroll (Experience/
@@ -149,11 +149,11 @@
 	});
 
 	function nudge(dx: number, dy: number) {
-		if (!draggable || !gsapRef || !windowEl) return;
-		const nx = (draggable.x ?? 0) + dx;
-		const ny = (draggable.y ?? 0) + dy;
+		if (!draggableInstance || !gsapRef || !windowEl) return;
+		const nx = (draggableInstance.x ?? 0) + dx;
+		const ny = (draggableInstance.y ?? 0) + dy;
 		gsapRef.set(windowEl, { x: nx, y: ny });
-		draggable.update();
+		draggableInstance.update();
 	}
 
 	function handleKeydown(event: KeyboardEvent) {

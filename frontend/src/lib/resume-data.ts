@@ -9,6 +9,7 @@ export interface Experience {
 export interface Project {
 	name: string;
 	bullets: string[];
+	demoId?: string;
 }
 
 export const experience: Experience[] = [
@@ -35,6 +36,7 @@ export const projects: Project[] = [
 	},
 	{
 		name: 'cmrlsim, A Chennai Metropolitan Railway Simulator',
+		demoId: 'cmrlsim',
 		bullets: [
 			'Designed and implemented a modular monolith simulation engine in Go modelling the full CMRL Phase I network (41 stations, 54.1 km) as a weighted directed graph, with discrete-event simulation of train movement, passenger boarding/alighting, fare collection, and ridership economics',
 			'Architected internal event bus, simulation clock, and service boundaries (clock, network, scheduler, train, passenger, fare, economics, pathfinder packages) to simulate distributed-system communication patterns within a single Go binary; exposed simulation state via a REST API'
