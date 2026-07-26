@@ -53,6 +53,14 @@
 	$effect(() => {
 		if (!maximized) cmrlsimOpen = false;
 	});
+	// Re-assert the maximized card's fixed position/size the moment the popup
+	// mounts — the popup's own Draggable setup and its layout insertion can
+	// otherwise leave the card's last-rendered position stale relative to the
+	// viewport (visible as the card jumping toward the bottom-right, clipped
+	// by the window edge, until the next wheel/scroll tick recomputes it).
+	$effect(() => {
+		if (cmrlsimOpen && target >= 1) render(1);
+	});
 
 	function zIndexOf(id: WindowId) {
 		return zOrder.indexOf(id) + 1;
@@ -350,8 +358,19 @@
 			if (blogTarget > 0) return;
 
 			const atTop = target >= 1 && (!centerContentEl || centerContentEl.scrollTop <= 0);
-			if (target >= 1 && event.deltaY > 0) return;
-			if (target >= 1 && event.deltaY < 0 && !atTop) return;
+
+			// Maximized and scrolling further in the same direction: this wheel
+			// tick belongs to the card's own content scroll, not the maximize
+			// jack. If the cursor isn't over the card, native scroll won't reach
+			// it — forward the delta manually so wheeling anywhere on the page
+			// scrolls the maximized window, not just the card itself.
+			if ((target >= 1 && event.deltaY > 0) || (target >= 1 && event.deltaY < 0 && !atTop)) {
+				if (centerContentEl && !centerContentEl.contains(event.target as Node)) {
+					event.preventDefault();
+					centerContentEl.scrollTop += event.deltaY;
+				}
+				return;
+			}
 
 			event.preventDefault();
 			setTarget(target + event.deltaY / MAXIMIZE_DISTANCE);
