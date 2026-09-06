@@ -1,71 +1,36 @@
-export const THEMES = ['milk-sea', 'arch-paper', 'straw-berry', 'persian-indigo'] as const;
-export type ThemeName = (typeof THEMES)[number];
+import { browser } from '$app/environment';
 
-// Mirrors the [data-theme] blocks in app.css — kept here too so swatch
-// buttons can render every theme's colours, not just the active one.
-export const THEME_COLORS: Record<ThemeName, readonly [string, string]> = {
-	'milk-sea': ['#F4F1EC', '#191265'],
-	'arch-paper': ['#06392F', '#F4F1EC'],
-	'straw-berry': ['#F4F1EC', '#990011'],
-	'persian-indigo': ['#F4F1EC', '#391285']
-};
+export type Theme = 'light' | 'dark';
 
-// Every theme pairs its --c1/--c2 with the same pale off-white, so a swatch
-// built from the full pair reads as white-plus-a-color. Swatches use just
-// the theme's saturated brand colour (never the pale one) as a solid fill.
-export const SWATCH_COLORS: Record<ThemeName, string> = {
-	'milk-sea': '#191265',
-	'arch-paper': '#06392F',
-	'straw-berry': '#990011',
-	'persian-indigo': '#391285'
-};
+const STORAGE_KEY = 'theme';
+const THEME_COLOR: Record<Theme, string> = { light: '#f6f5f2', dark: '#1a1b26' };
 
-export const THEME_LABELS: Record<ThemeName, string> = {
-	'milk-sea': 'Milk Sea',
-	'arch-paper': 'Arch Paper',
-	'straw-berry': 'Strawberry',
-	'persian-indigo': 'Persian Indigo'
-};
-
-const THEME_KEY = 'theme';
-const SWAP_KEY = 'theme-swap';
-
-function readInitialTheme(): ThemeName {
-	if (typeof document === 'undefined') return 'milk-sea';
-	const current = document.documentElement.dataset.theme;
-	return (THEMES as readonly string[]).includes(current ?? '')
-		? (current as ThemeName)
-		: 'milk-sea';
+// The inline script in app.html has already resolved and stamped the theme by
+// the time this module runs in the browser, so read it back off the element
+// rather than re-deriving it (and disagreeing with what's on screen).
+function initial(): Theme {
+	if (!browser) return 'light';
+	return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
-function readInitialSwap(): boolean {
-	if (typeof document === 'undefined') return false;
-	return document.documentElement.dataset.swap === 'true';
+let current = $state<Theme>(initial());
+
+export function theme(): Theme {
+	return current;
 }
 
-export const themeState = $state({
-	theme: readInitialTheme(),
-	swapped: readInitialSwap()
-});
-
-function persist() {
-	if (typeof document === 'undefined') return;
-	document.documentElement.dataset.theme = themeState.theme;
-	document.documentElement.dataset.swap = String(themeState.swapped);
+export function setTheme(next: Theme) {
+	current = next;
+	document.documentElement.dataset.theme = next;
+	document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[next]);
 	try {
-		localStorage.setItem(THEME_KEY, themeState.theme);
-		localStorage.setItem(SWAP_KEY, String(themeState.swapped));
+		localStorage.setItem(STORAGE_KEY, next);
 	} catch {
-		// localStorage unavailable (private mode, disabled storage) — theme just won't persist.
+		// Private browsing / storage disabled — the theme still applies for this
+		// page view, it just won't be remembered.
 	}
 }
 
-export function setTheme(next: ThemeName) {
-	themeState.theme = next;
-	persist();
-}
-
-export function toggleSwap() {
-	themeState.swapped = !themeState.swapped;
-	persist();
+export function toggleTheme() {
+	setTheme(current === 'dark' ? 'light' : 'dark');
 }

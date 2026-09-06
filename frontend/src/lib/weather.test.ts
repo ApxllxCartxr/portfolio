@@ -2,16 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { describeWeatherCode } from './weather';
 
 describe('describeWeatherCode', () => {
-	it('maps clear sky to sun', () => {
-		expect(describeWeatherCode(0)).toEqual({ label: 'Clear sky', icon: 'sun' });
+	it('maps clear sky', () => {
+		expect(describeWeatherCode(0)).toBe('Clear sky');
 	});
 
-	it('maps thunderstorm codes to the lightning icon', () => {
-		expect(describeWeatherCode(95).icon).toBe('cloud-lightning');
-		expect(describeWeatherCode(99).icon).toBe('cloud-lightning');
+	it('maps both thunderstorm codes', () => {
+		expect(describeWeatherCode(95)).toBe('Thunderstorm');
+		expect(describeWeatherCode(99)).toBe('Thunderstorm with hail');
 	});
 
-	it('falls back to overcast/cloud for unknown codes', () => {
-		expect(describeWeatherCode(-1)).toEqual({ label: 'Overcast', icon: 'cloud' });
+	it('falls back for unknown codes', () => {
+		expect(describeWeatherCode(-1)).toBe('Overcast');
 	});
 });
