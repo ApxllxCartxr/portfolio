@@ -59,11 +59,14 @@
 		max-height: 88vh;
 		margin: auto;
 		padding: 0;
-		border: 1px solid var(--line);
+		border: var(--rule) solid var(--line);
 		border-radius: var(--radius-lg);
 		background: var(--bg-raised);
 		color: var(--fg);
 		overflow: hidden;
+		box-shadow:
+			0 1px 0 color-mix(in srgb, var(--fg) 4%, transparent),
+			0 30px 60px -20px color-mix(in srgb, var(--fg) 35%, transparent);
 	}
 
 	.window::backdrop {
@@ -75,12 +78,12 @@
 		align-items: center;
 		gap: 0.6rem;
 		padding: 0.5rem 0.6rem 0.5rem 0.9rem;
-		border-bottom: 1px solid var(--line);
+		border-bottom: var(--rule) solid var(--line);
 		background: var(--bg);
 		color: var(--muted);
 		font-family: var(--font-mono);
-		font-size: 0.7rem;
-		letter-spacing: 0.08em;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
 		text-transform: uppercase;
 	}
 
@@ -99,7 +102,7 @@
 		border: none;
 		background: none;
 		color: inherit;
-		font-size: 1.1rem;
+		font-size: 0.825rem;
 		line-height: 1;
 		cursor: pointer;
 	}

@@ -237,8 +237,11 @@
 		display: flex;
 		align-items: baseline;
 		gap: 0.35rem;
-		font-size: 0.8rem;
-		font-weight: 500;
+		font-family: var(--font-mono);
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--muted);
 		margin: 0;
 	}
 

@@ -40,10 +40,10 @@
 		z-index: 20;
 		display: flex;
 		justify-content: center;
-		padding: 1rem;
-		/* The page scrolls under the pill, so the strip behind it has to be
-		   opaque — otherwise text slides through the gap around the pill. */
-		background: var(--bg);
+		padding: 0.5rem 1rem;
+		/* No background — the strip is transparent so the page scrolls
+		   straight under the floating pill. */
+		background: transparent;
 	}
 
 	.pill {
@@ -66,7 +66,7 @@
 		background: none;
 		color: var(--muted);
 		font-family: var(--font-body);
-		font-size: 0.85rem;
+		font-size: 0.956rem;
 		line-height: 1.4;
 		text-decoration: none;
 		cursor: pointer;
@@ -91,7 +91,7 @@
 	}
 
 	.toggle {
-		font-size: 0.9rem;
+		font-size: 1.013rem;
 		padding-inline: 0.6rem;
 	}
 </style>

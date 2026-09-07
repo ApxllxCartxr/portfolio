@@ -1,16 +1,17 @@
 <!--
-	Static resume content, rendered inline on the single scrolling homepage.
-	Entries are hairline-separated rows, not cards — cards mean "widget" in the
-	bento above, and boxing everything flattened the hierarchy. Same
-	content-left / meta-right shape as the writing index.
-	The cmrlsim project's live Mini-Metro-style
-	simulation opens on click, in a window, rather than sitting inline — it's
-	a tall animated block that otherwise dominates the Projects section. The
-	window itself belongs to the page (the simulation tile opens the same one),
-	so this only reports the request.
+	Experience, Projects, and Skills as three plates of the same catalog
+	rather than a resume. Each block opens with a title carrying the same
+	accent asterisk as the hero name, then runs full-width — no sticky rail
+	label, no two-column split. Experience and Projects share one entry
+	shape: a hanging plate number, a wall-label credit line (employer/stack
+	· location/discipline, dates) in place of a mono meta chip, and one
+	curatorial sentence instead of bullets. Every entry is the same height
+	regardless of how much happened, so the list scales to any count.
+	Skills drops the shields-style color pills for a quiet colophon list,
+	grouped and set in running text.
 -->
 <script lang="ts">
-	import { experience, projects, skills } from '$lib/resume-data';
+	import { experience, projects, skillGroups } from '$lib/resume-data';
 
 	interface Props {
 		onOpenDemo: () => void;
@@ -21,210 +22,201 @@
 
 <section class="resume" aria-label="Resume">
 	<div class="block">
-		<h2>Experience</h2>
+		<h2>Experience<span class="mark" aria-hidden="true">*</span></h2>
 		<div class="block-body">
-			{#each experience as job (job.company)}
+			{#each experience as job, i (job.role)}
 				<article class="entry">
-					<div class="entry-head">
-						<div>
-							<h3>{job.role}</h3>
-							<p class="meta">{job.period}</p>
-						</div>
-						<p class="org">
-							{job.company}<span class="place">{job.location}</span>
-						</p>
+					<span class="plate" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+					<div class="entry-main">
+						<h3>{job.role}</h3>
+						<p class="medium">{job.medium}</p>
+						<p class="blurb">{job.blurb}</p>
 					</div>
-					<ul>
-						{#each job.bullets as bullet (bullet)}
-							<li>{bullet}</li>
-						{/each}
-					</ul>
 				</article>
 			{/each}
 		</div>
 	</div>
 
 	<div class="block">
-		<h2>Projects</h2>
+		<h2>Projects<span class="mark" aria-hidden="true">*</span></h2>
 		<div class="block-body">
-			{#each projects as project (project.name)}
-				<article class="entry">
-					<h3>{project.name}</h3>
-					<ul>
-						{#each project.bullets as bullet (bullet)}
-							<li>{bullet}</li>
-						{/each}
-					</ul>
-					{#if project.demoId === 'cmrlsim'}
-						<button type="button" class="demo-open" onclick={onOpenDemo}>
-							Open the simulation &rarr;
-						</button>
-					{/if}
+			{#each projects as project, i (project.name)}
+				<article class="entry" id={project.anchorId}>
+					<span class="plate" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+					<div class="entry-main">
+						<h3>{project.name}</h3>
+						<p class="medium">{project.medium}</p>
+						<p class="blurb">{project.blurb}</p>
+						<div class="entry-links">
+							{#if project.github}
+								<a class="entry-link" href={project.github} target="_blank" rel="noreferrer">
+									View on GitHub &nearr;
+								</a>
+							{/if}
+							{#if project.demoId === 'cmrlsim'}
+								<button type="button" class="entry-link" onclick={onOpenDemo}>
+									Open the simulation &rarr;
+								</button>
+							{/if}
+						</div>
+					</div>
 				</article>
 			{/each}
 		</div>
 	</div>
 
 	<div class="block">
-		<h2>Skills</h2>
-		<div class="block-body">
-			<div class="skills">
-				{#each skills as skill (skill)}<span class="pill">{skill}</span>{/each}
-			</div>
+		<h2>Skills<span class="mark" aria-hidden="true">*</span></h2>
+		<div class="block-body skills-body">
+			{#each skillGroups as group (group.label)}
+				<div class="skill-row">
+					<span class="skill-label">{group.label}</span>
+					<p class="skill-list">{group.items.join(' · ')}</p>
+				</div>
+			{/each}
 		</div>
 	</div>
 </section>
 
 <style>
 	.block + .block {
-		margin-top: 3rem;
+		margin-top: clamp(2.5rem, 5vh, 3.5rem);
 	}
 
-	/* Section labels are micro-scale and set in mono, not display serif — they
-	   name the column rather than competing with the entry titles inside it. */
+	/* PP Kyoto, dark ink, small — the accent asterisk echoes the mark on the
+	   hero name instead of falling back to a tracked mono caption. */
 	h2 {
-		font-family: var(--font-mono);
-		font-size: 0.7rem;
-		font-weight: 400;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--muted);
 		margin: 0 0 1.1rem;
+		font-family: var(--font-serif);
+		font-size: var(--t-section);
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		line-height: 1.2;
+		color: var(--fg);
 	}
 
-	/* Heading in a left rail, entries in the main column. The rail heading
-	   sticks while its entries scroll past, so the section you're reading is
-	   always labelled. */
-	@media (min-width: 900px) {
-		.block {
-			display: grid;
-			grid-template-columns: 13rem minmax(0, 1fr);
-			column-gap: 2.5rem;
-			align-items: start;
-		}
-
-		h2 {
-			position: sticky;
-			top: 2rem;
-			margin: 0;
-		}
+	h2 .mark {
+		display: inline-block;
+		margin-left: -0.05em;
+		font-size: 0.8em;
+		vertical-align: 0.32em;
+		color: var(--accent);
 	}
 
-	/* The rule under the section label anchors the column the way the writing
-	   index does, so every block on the page opens the same way. */
 	.block-body {
-		border-top: 1px solid var(--line);
+		border-top: var(--rule) solid var(--line);
 		padding-top: 1.1rem;
+	}
+
+	/* Plate number hangs to the left, independent of how many lines the
+	   entry runs to — the same shape at 2 entries or 20. */
+	.entry {
+		display: grid;
+		grid-template-columns: 2rem minmax(0, 1fr);
+		gap: 0 1rem;
+		padding-bottom: 1.4rem;
+		/* SimhaLink is a hero-bio link target — keep it clear of the sticky nav. */
+		scroll-margin-top: 6rem;
 	}
 
 	.entry + .entry {
-		padding-top: 1.1rem;
-		border-top: 1px solid var(--line);
-	}
-
-	.entry {
-		padding-bottom: 1.1rem;
+		padding-top: 1.4rem;
+		border-top: var(--rule) solid var(--line);
 	}
 
 	.block-body > .entry:last-child {
 		padding-bottom: 0;
 	}
 
-	.entry-head {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: baseline;
-		justify-content: space-between;
-		gap: 0.5rem 1.5rem;
-	}
-
-	.org {
-		font-family: var(--font-body);
-		font-size: 0.9rem;
-		text-align: right;
-		margin: 0 0 0.7rem;
-	}
-
-	.place {
-		display: block;
-		font-size: 0.8rem;
+	.plate {
+		font-family: var(--font-serif);
+		font-weight: 700;
+		font-size: 1rem;
+		font-variant-numeric: oldstyle-nums;
 		color: var(--muted);
 	}
 
-	/* Once the head wraps to two rows, right-aligning the org leaves it ragged
-	   against the role above it. */
-	@media (max-width: 640px) {
-		.org {
-			text-align: left;
-		}
+	.entry-main {
+		min-width: 0;
 	}
 
-	.entry h3 {
-		font-family: var(--font-title);
-		font-size: 1.15rem;
+	.entry-main h3 {
+		margin: 0 0 0.35rem;
+		font-size: clamp(1.2rem, 1.9vw, 1.4rem);
 		font-weight: 600;
-		line-height: 1.3;
-		margin: 0 0 0.25rem;
+		line-height: 1.2;
+		letter-spacing: -0.005em;
 	}
 
-	.demo-open {
-		margin-top: 1rem;
-		padding: 0.35rem 0.8rem;
-		border: 1px solid var(--line);
-		border-radius: 999px;
-		background: var(--bg);
+	.medium {
+		margin: 0 0 0.6rem;
+		font-family: var(--font-serif);
+		font-size: var(--t-caption);
+		font-weight: 500;
 		color: var(--muted);
-		font-family: var(--font-mono);
-		font-size: 0.72rem;
-		cursor: pointer;
 	}
 
-	.demo-open:hover,
-	.demo-open:focus-visible {
-		border-color: var(--fg);
+	.blurb {
+		margin: 0;
+		max-width: 64ch;
+		font-size: 1rem;
+		line-height: 1.6;
 		color: var(--fg);
 	}
 
-	.meta {
-		font-family: var(--font-mono);
-		font-size: 0.75rem;
-		letter-spacing: 0.01em;
-		color: var(--muted);
-		margin: 0 0 0.7rem;
-	}
-
-	/* These read as short paragraphs, not list items — discs were the last
-	   default browser styling on the page, and setting the most substantive
-	   copy on the site in --muted had the hierarchy backwards. */
-	.entry ul {
-		max-width: 72ch;
-		display: flex;
-		flex-direction: column;
-		gap: 0.6rem;
-		list-style: none;
-		font-family: var(--font-body);
-		font-size: 1rem;
-		line-height: 1.6;
-		padding: 0;
-		margin: 0;
-	}
-
-	.skills {
+	.entry-links {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.45rem;
-		margin: 0;
+		gap: 0.5rem 1.5rem;
+		margin-top: 0.9rem;
 	}
 
-	.pill {
-		border: 1px solid var(--line);
-		background: var(--bg-raised);
+	.entry-link {
+		margin: 0;
+		padding: 0;
+		border: none;
+		background: none;
+		font-family: var(--font-serif);
+		font-size: var(--t-caption);
+		font-weight: 500;
 		color: var(--muted);
-		font-family: var(--font-mono);
-		font-size: 0.72rem;
-		line-height: 1;
-		padding: 0.35rem 0.75rem;
-		border-radius: 999px;
-		white-space: nowrap;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.entry-link:hover,
+	.entry-link:focus-visible {
+		color: var(--accent);
+	}
+
+	/* Skills as a colophon, not a badge shelf: grouped, comma-set, quiet. */
+	.skills-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+	}
+
+	.skill-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.3rem 1rem;
+	}
+
+	.skill-label {
+		flex: 0 0 auto;
+		min-width: 10rem;
+		font-family: var(--font-serif);
+		font-weight: 700;
+		font-size: 0.95rem;
+		color: var(--fg);
+	}
+
+	.skill-list {
+		flex: 1 1 240px;
+		margin: 0;
+		font-size: 1rem;
+		line-height: 1.6;
+		color: var(--muted);
 	}
 </style>

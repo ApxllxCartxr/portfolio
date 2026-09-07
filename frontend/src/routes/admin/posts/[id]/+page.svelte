@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Edit {data.post.title} — Joseph Fernando</title>
+	<title>Edit {data.post.title} · Joseph Fernando</title>
 </svelte:head>
 
 <main class="wrap">
@@ -54,26 +54,35 @@
 
 <style>
 	.wrap {
+		width: 100%;
 		max-width: 720px;
-		margin: 0 auto;
-		padding: 3rem 1.25rem 5rem;
+		margin-inline: auto;
+		padding: clamp(2rem, 6vh, 3rem) clamp(1.25rem, 5vw, 2rem) 5rem;
 		color: var(--fg);
 	}
 
 	.back {
 		display: inline-block;
-		font-family: var(--font-mono);
-		font-size: 0.8rem;
-		color: inherit;
-		text-decoration: underline;
-		text-underline-offset: 3px;
 		margin-bottom: 1.5rem;
+		font-family: var(--font-mono);
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--muted);
+		text-decoration: underline;
+		text-underline-offset: 4px;
+		text-decoration-thickness: 1px;
+	}
+
+	.back:hover,
+	.back:focus-visible {
+		color: var(--accent);
 	}
 
 	h1 {
 		font-family: var(--font-title);
-		font-size: 2rem;
-		font-weight: 700;
+		font-size: var(--t-h1);
+		font-weight: 600;
 		margin: 0 0 2rem;
 	}
 
@@ -84,19 +93,22 @@
 	}
 
 	label {
+		margin-top: 0.9rem;
 		font-family: var(--font-mono);
-		font-size: 0.78rem;
-		opacity: 0.7;
-		margin-top: 0.8rem;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--muted);
 	}
 
 	input[type='text'],
 	textarea {
 		font-family: var(--font-body);
-		font-size: 1rem;
+		font-size: var(--t-body);
 		padding: 0.55rem 0.65rem;
-		border: 1px solid var(--fg);
-		background: var(--bg);
+		border: var(--rule) solid var(--line);
+		border-radius: var(--radius);
+		background: var(--bg-raised);
 		color: var(--fg);
 		resize: vertical;
 	}
@@ -104,7 +116,7 @@
 	textarea {
 		font-family: var(--font-mono);
 		font-size: 0.9rem;
-		line-height: 1.5;
+		line-height: 1.6;
 	}
 
 	.checkbox {
@@ -120,30 +132,49 @@
 
 	button {
 		font-family: var(--font-mono);
-		font-size: 0.85rem;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
 		padding: 0.6rem 1.1rem;
-		border: 1px solid var(--fg);
+		border: var(--rule) solid var(--fg);
+		border-radius: var(--radius);
 		background: var(--fg);
 		color: var(--bg);
 		cursor: pointer;
 	}
 
+	button:hover,
+	button:focus-visible {
+		opacity: 0.85;
+	}
+
 	.delete {
 		margin-top: 2.5rem;
 		background: none;
-		color: var(--accent);
 		border-color: var(--accent);
+		color: var(--accent);
+		opacity: 1;
+	}
+
+	.delete:hover,
+	.delete:focus-visible {
+		background: var(--accent);
+		color: var(--bg);
 	}
 
 	.error {
 		font-family: var(--font-mono);
-		font-size: 0.8rem;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
 		color: var(--accent);
 	}
 
 	.success {
 		font-family: var(--font-mono);
-		font-size: 0.8rem;
-		opacity: 0.7;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--ok);
 	}
 </style>

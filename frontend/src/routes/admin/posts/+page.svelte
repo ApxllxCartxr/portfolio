@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Manage posts — Joseph Fernando</title>
+	<title>Manage posts · Joseph Fernando</title>
 </svelte:head>
 
 <main class="wrap">
@@ -47,9 +47,10 @@
 
 <style>
 	.wrap {
+		width: 100%;
 		max-width: 720px;
-		margin: 0 auto;
-		padding: 3rem 1.25rem 5rem;
+		margin-inline: auto;
+		padding: clamp(2rem, 6vh, 3rem) clamp(1.25rem, 5vw, 2rem) 5rem;
 		color: var(--fg);
 	}
 
@@ -57,33 +58,46 @@
 		display: flex;
 		align-items: baseline;
 		justify-content: space-between;
+		gap: 1rem;
 		margin-bottom: 2rem;
 	}
 
 	h1 {
 		font-family: var(--font-title);
-		font-size: 2rem;
-		font-weight: 700;
+		font-size: var(--t-h1);
+		font-weight: 600;
 		margin: 0;
 	}
 
 	.new {
 		font-family: var(--font-mono);
-		font-size: 0.8rem;
-		color: inherit;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--muted);
 		text-decoration: underline;
-		text-underline-offset: 3px;
+		text-underline-offset: 4px;
+		text-decoration-thickness: 1px;
+	}
+
+	.new:hover,
+	.new:focus-visible {
+		color: var(--accent);
 	}
 
 	.empty {
-		font-family: var(--font-body);
-		opacity: 0.75;
+		font-family: var(--font-mono);
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		color: var(--muted);
 	}
 
 	.posts {
 		list-style: none;
 		margin: 0;
 		padding: 0;
+		border-top: var(--rule) solid var(--line);
 	}
 
 	.posts li {
@@ -92,22 +106,20 @@
 		justify-content: space-between;
 		gap: 1rem;
 		padding: 0.9rem 0;
-		border-top: 1px solid var(--fg);
-	}
-
-	.posts li:last-child {
-		border-bottom: 1px solid var(--fg);
+		border-bottom: var(--rule) solid var(--line);
 	}
 
 	.info {
 		display: flex;
 		align-items: center;
 		gap: 0.7rem;
+		min-width: 0;
 	}
 
 	.info a {
 		font-family: var(--font-body);
-		font-size: 1.05rem;
+		font-size: var(--t-body);
+		font-weight: 500;
 		color: inherit;
 		text-decoration: none;
 	}
@@ -119,29 +131,32 @@
 
 	.status {
 		font-family: var(--font-mono);
-		font-size: 0.7rem;
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
 		text-transform: uppercase;
-		opacity: 0.6;
+		color: var(--muted);
 	}
 
 	.status.draft {
 		color: var(--accent);
-		opacity: 1;
 	}
 
 	button {
 		font-family: var(--font-mono);
-		font-size: 0.75rem;
-		padding: 0.35rem 0.6rem;
-		border: 1px solid var(--fg);
+		font-size: var(--t-caption);
+		letter-spacing: var(--t-track);
+		text-transform: uppercase;
+		padding: 0.4rem 0.7rem;
+		border: var(--rule) solid var(--line);
+		border-radius: var(--radius);
 		background: none;
-		color: var(--fg);
+		color: var(--muted);
 		cursor: pointer;
 	}
 
 	button:hover,
 	button:focus-visible {
-		background: var(--fg);
-		color: var(--bg);
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 </style>

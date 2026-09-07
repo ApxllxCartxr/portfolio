@@ -2,27 +2,13 @@
 
 /* ============================================================
    Fonts — self-hosted, subsetted to woff2 (see /static/fonts)
-   Roles:  Redaction 35 → the name, the one display face, used once
+   Roles:  EB Garamond → the name, the one display face, used once
            Open Sauce Sans → body and titles
            Iosevka Term SS08 → every mono label, chip, clock and spec row
-           Belmonte Ballpoint → the greeting, subset to its five glyphs
+           PP Kyoto → every other serif touchpoint (flourishes, pull quotes)
    Iosevka is OFL 1.1 — see static/fonts/LICENSE-Iosevka.txt.
+   EB Garamond is OFL 1.1 — see static/fonts/LICENSE-EBGaramond.txt.
    ============================================================ */
-@font-face {
-	font-family: 'Redaction 35';
-	src: url('/fonts/Redaction35-Regular.woff2') format('woff2');
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: 'Redaction 35';
-	src: url('/fonts/Redaction35-Bold.woff2') format('woff2');
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
-
 @font-face {
 	font-family: 'Open Sauce Sans';
 	src: url('/fonts/OpenSauceSans-Regular.woff2') format('woff2');
@@ -61,21 +47,45 @@
 }
 
 @font-face {
-	font-family: 'Belmonte Ballpoint';
-	src: url('/fonts/BelmonteBallpoint-Subset.woff2') format('woff2');
+	font-family: 'EB Garamond';
+	src: url('/fonts/EBGaramond-400.woff2') format('woff2');
 	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'EB Garamond';
+	src: url('/fonts/EBGaramond-700.woff2') format('woff2');
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'PP Kyoto';
+	src: url('/fonts/PPKyoto-Medium.woff2') format('woff2');
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: 'PP Kyoto';
+	src: url('/fonts/PPKyoto-Extrabold.woff2') format('woff2');
+	font-weight: 700;
 	font-style: normal;
 	font-display: swap;
 }
 
 @theme {
-	--font-display: 'Redaction 35', Georgia, serif; /* main name */
-	/* Titles share the body family at SemiBold. Redaction is the only display
-	   face on the page, used once, on the name — a second serif underneath it
-	   read as two headings arguing. */
+	--font-display: 'EB Garamond', Georgia, serif; /* main name */
+	/* Titles share the body family at SemiBold — EB Garamond is the only
+	   display face on the page, used once, on the name — a second serif
+	   underneath it would read as two headings arguing. */
 	--font-title: 'Open Sauce Sans', ui-sans-serif, system-ui, sans-serif;
 	--font-body: 'Open Sauce Sans', ui-sans-serif, system-ui, sans-serif; /* body */
-	--font-hand: 'Belmonte Ballpoint', cursive; /* handwritten intro line */
+	/* Every other serif touchpoint (flourishes, pull quotes) is PP Kyoto,
+	   kept distinct from the EB Garamond display face. */
+	--font-serif: 'PP Kyoto', Georgia, serif;
 	/* Mono is load-bearing here — chips, spec rows, the clock, every meta
 	   label — so it ships rather than falling back to whatever the OS has. */
 	--font-mono: 'Iosevka Term SS08', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -136,17 +146,43 @@
 	--scrim: rgb(0 0 0 / 0.55);
 }
 
+/* ============================================================
+   TYPE SCALE — defined as custom properties so every surface
+   resolves to one source of truth. Steps are dramatic on purpose:
+   display → title → body is a cliff, not a slope. Caption sits
+   below body in size AND goes mono + tracked + uppercase, so
+   metadata never competes with the headline above it.
+   ============================================================ */
+:root {
+	--t-display: clamp(3.25rem, 9vw, 6rem); /* hero name */
+	--t-h1: clamp(1.85rem, 3.5vw, 2.6rem); /* section title (job role) */
+	--t-h2: 0.72rem; /* small mono badge: the "live" status dot */
+	--t-section: clamp(1rem, 1.4vw, 1.15rem); /* rail title: Experience, Projects, Skills, Writing */
+	--t-body: 1rem;
+	--t-caption: 0.75rem;
+	--t-track: 0.14em;
+
+	--measure: 64ch;
+	--col-label: 8.5rem;
+
+	--radius: 6px;
+	--radius-lg: 10px;
+	--rule: 1px;
+
+	--focus-ring: var(--fg);
+}
+
 /* Derived tokens — always in terms of the palette, never a literal colour. */
 :root {
 	--focus-ring: var(--fg);
-	--radius: 10px;
-	--radius-lg: 14px;
 }
 
 html {
 	background: var(--bg);
 	color: var(--fg);
 	font-family: var(--font-body);
+	font-size: var(--t-body);
+	line-height: 1.55;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
 }
@@ -183,9 +219,28 @@ a {
 	color: inherit;
 }
 
+/* A thin vertical rail at the column gutter — gives the spine something
+   to do on wide screens. The hairline is the same --line used everywhere
+   else, so the page stays one material. */
+.rail-rule {
+	position: relative;
+}
+
+@media (min-width: 900px) {
+	.rail-rule::before {
+		content: '';
+		position: absolute;
+		left: calc(var(--col-label) - 0.5rem);
+		top: 0.4em;
+		bottom: 0.4em;
+		width: var(--rule);
+		background: var(--line);
+	}
+}
+
 :focus-visible {
 	outline: 2px solid var(--focus-ring);
-	outline-offset: 2px;
+	outline-offset: 3px;
 	border-radius: 2px;
 }
 
