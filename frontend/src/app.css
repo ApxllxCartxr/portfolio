@@ -106,6 +106,7 @@
 :root {
 	--bg: #f6f5f2;
 	--bg-raised: #fffdfa;
+	--bg-sunken: #eceae4;
 	--fg: #16161a;
 	--muted: #6c6c74;
 	--line: #e2e0da;
@@ -122,6 +123,7 @@
 	:root:not([data-theme='light']) {
 		--bg: #1a1b26;
 		--bg-raised: #20212e;
+		--bg-sunken: #15161f;
 		--fg: #c0caf5;
 		--muted: #a9b1d6;
 		--line: #3b4261;
@@ -136,6 +138,7 @@
 :root[data-theme='dark'] {
 	--bg: #1a1b26;
 	--bg-raised: #20212e;
+	--bg-sunken: #15161f;
 	--fg: #c0caf5;
 	--muted: #a9b1d6;
 	--line: #3b4261;

@@ -10,15 +10,20 @@
 	  caption  0.72rem  Iosevka, 500 + tracked + uppercase
 
 	The accent (--accent) is the page's signal colour. It earns touchpoints
-	here: the asterisk after the name, the layers glyph, and the link colour
-	on the bio's in-page references.
+	here: the asterisk after the name, the layers glyph, and the project
+	names in the ticker below the bio.
 -->
-<script lang="ts"></script>
+<script lang="ts">
+	import ProjectTicker from '$lib/components/ProjectTicker.svelte';
+
+	let { onOpenDemo }: { onOpenDemo?: () => void } = $props();
+</script>
 
 <div class="layout">
 	<div class="copy">
 		<h1 class="name">
-			Joseph Fernando<span class="mark" aria-hidden="true">*</span>
+			Joseph<br />
+			<span class="fer">Fernando</span><span class="mark" aria-hidden="true">*</span>
 		</h1>
 
 		<p class="headline">
@@ -49,9 +54,7 @@
 		<div class="bio">
 			<p>
 				I spend most of my time on backends and simulation. Right now that means
-				<a href="#cmrlsim">cmrlsim</a>, a discrete-event model of Chennai's metro network in Go, and
-				<a href="#simhalink">SimhaLink</a>, a real-time crowd-safety app built for one of the
-				world's largest gatherings.
+				<ProjectTicker {onOpenDemo} />
 			</p>
 			<p class="context">
 				pre-final year cse grad @cit chennai, ex-sde intern @ picabord tech., president @ edc-citil.
@@ -103,7 +106,7 @@
 	.name {
 		font-family: var(--font-display);
 		font-size: var(--t-display);
-		line-height: 0.78;
+		line-height: 0.53;
 		font-weight: 700;
 		letter-spacing: -0.01em;
 		margin: 0;
@@ -121,12 +124,19 @@
 		color: var(--accent);
 	}
 
+	/* Second line of the name, set down-and-in relative to "Joseph". */
+	.fer {
+		display: inline-block;
+		padding-left: 0.4em;
+	}
+
 	.headline {
 		display: flex;
 		flex-wrap: wrap;
 		align-items: baseline;
 		column-gap: 0.5rem;
-		margin: 1.4rem 0 0;
+		margin: 2.2rem 0 0;
+		padding-top: 0.5rem;
 		max-width: 30ch;
 		font-size: var(--t-h1);
 		line-height: 1.18;
@@ -139,8 +149,8 @@
 	/* One geometric mark, one job: it stands in for the word "stack" between
 	   the two halves of "Full-stack systems" instead of decorating them. */
 	.stack-icon {
-		width: 0.62em;
-		height: 0.62em;
+		width: 0.95em;
+		height: 0.95em;
 		align-self: center;
 		color: var(--accent);
 		fill: var(--accent);
@@ -161,13 +171,6 @@
 		font-size: clamp(1.05rem, 1.3vw, 1.2rem);
 		line-height: 1.65;
 		color: var(--fg);
-	}
-
-	.bio a {
-		color: var(--accent);
-		text-decoration: underline;
-		text-decoration-thickness: 1px;
-		text-underline-offset: 3px;
 	}
 
 	.context {

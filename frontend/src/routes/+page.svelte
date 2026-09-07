@@ -106,7 +106,7 @@
 
 <main class="page">
 	<section class="hero section">
-		<CenterCard />
+		<CenterCard onOpenDemo={() => (cmrlsimOpen = true)} />
 	</section>
 
 	<div class="section feature-wrap">
@@ -158,7 +158,8 @@
 		box-sizing: border-box;
 		min-height: 100dvh;
 		display: flex;
-		align-items: flex-start;
+		flex-direction: column;
+		justify-content: center;
 		padding-top: clamp(0.75rem, 2vh, 1.5rem);
 		/* Dock is fixed at bottom (clamp(1.25rem, 4vh, 2.5rem) offset + tile
 		   height) — reserve enough room so the hero's content never sits
