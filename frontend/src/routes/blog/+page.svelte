@@ -1,21 +1,33 @@
+<!--
+	The writing index. Same section language as the homepage — the display
+	face for the heading, a hairline for structure, no tracked mono captions —
+	so following "Writing" from the homepage does not walk into a different
+	document.
+-->
 <script lang="ts">
 	import PostList from '$lib/components/PostList.svelte';
+	import Seo from '$lib/components/Seo.svelte';
+	import SectionMark from '$lib/components/SectionMark.svelte';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
 </script>
 
-<svelte:head>
-	<title>Blog · Joseph Fernando</title>
-</svelte:head>
+<Seo
+	title="Writing — Joseph Fernando"
+	description="Notes on backends, simulation and real-time systems by Joseph Fernando."
+/>
 
-<main class="wrap rail-rule">
-	<div class="head">
-		<h1>Writing<span class="mark" aria-hidden="true">*</span></h1>
-	</div>
-	<div class="body">
-		<PostList posts={data.posts} unavailable={data.unavailable} verboseEmpty showAllLink={false} />
-	</div>
+<main class="wrap">
+	<header class="head">
+		<div class="title">
+			<SectionMark glyph="writing" size={2.2} />
+			<h1>Writing<span class="mark" aria-hidden="true">*</span></h1>
+		</div>
+		<p>Notes on the things I build — backends, simulation, and systems under load.</p>
+	</header>
+
+	<PostList posts={data.posts} unavailable={data.unavailable} verboseEmpty showAllLink={false} />
 </main>
 
 <style>
@@ -23,47 +35,44 @@
 		width: 100%;
 		max-width: 1080px;
 		margin-inline: auto;
-		padding: clamp(2rem, 6vh, 4rem) clamp(1.25rem, 5vw, 2.5rem) clamp(3rem, 8vh, 6rem);
+		padding: clamp(2.5rem, 7vh, 4.5rem) clamp(1.25rem, 5vw, 2.5rem) clamp(3rem, 8vh, 6rem);
 		color: var(--fg);
 	}
 
-	/* Same left-rail mono caption / right-column shape as the homepage's
-	   Experience, Projects, and Writing blocks — this page is that column
-	   expanded to full length, not a different document. */
+	.head {
+		margin-bottom: clamp(2rem, 5vh, 3rem);
+		padding-bottom: clamp(1.25rem, 3vh, 2rem);
+		border-bottom: var(--rule) solid var(--line);
+	}
+
+	.title {
+		display: flex;
+		align-items: center;
+		gap: 0.7rem;
+	}
+
 	h1 {
-		margin: 0 0 1.1rem;
-		font-family: var(--font-serif);
-		font-size: var(--t-section);
+		margin: 0;
+		font-family: var(--font-display);
+		font-size: clamp(2.25rem, 5vw, 3.25rem);
 		font-weight: 700;
-		letter-spacing: -0.01em;
-		line-height: 1.2;
-		color: var(--fg);
+		line-height: 1;
+		letter-spacing: -0.025em;
 	}
 
 	h1 .mark {
 		display: inline-block;
-		margin-left: -0.05em;
-		font-size: 0.8em;
-		vertical-align: 0.32em;
+		margin-left: -0.02em;
+		font-size: 0.75em;
+		vertical-align: 0.42em;
 		color: var(--accent);
 	}
 
-	.body {
-		min-width: 0;
-	}
-
-	@media (min-width: 900px) {
-		.wrap {
-			display: grid;
-			grid-template-columns: var(--col-label) minmax(0, 1fr);
-			column-gap: 2rem;
-			align-items: start;
-		}
-
-		h1 {
-			position: sticky;
-			top: 5rem;
-			margin: 0;
-		}
+	.head p {
+		max-width: var(--measure);
+		margin: 1rem 0 0;
+		font-size: 1.05rem;
+		line-height: 1.6;
+		color: var(--muted);
 	}
 </style>

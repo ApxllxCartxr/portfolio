@@ -20,15 +20,29 @@ export function theme(): Theme {
 }
 
 export function setTheme(next: Theme) {
-	current = next;
-	document.documentElement.dataset.theme = next;
-	document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[next]);
-	try {
-		localStorage.setItem(STORAGE_KEY, next);
-	} catch {
-		// Private browsing / storage disabled — the theme still applies for this
-		// page view, it just won't be remembered.
+	if (current === next) return;
+
+	const apply = () => {
+		current = next;
+		document.documentElement.dataset.theme = next;
+		document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[next]);
+		try {
+			localStorage.setItem(STORAGE_KEY, next);
+		} catch {
+			// Private browsing / storage disabled — the theme still applies for this
+			// page view, it just won't be remembered.
+		}
+	};
+
+	// Melt between the two surfaces instead of snapping: the browser snapshots
+	// the current palette and crossfades to the new one. Falls back to the
+	// instant flip when the API is missing or the user prefers reduced motion.
+	const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (!('startViewTransition' in document) || reduce) {
+		apply();
+		return;
 	}
+	document.startViewTransition(apply);
 }
 
 export function toggleTheme() {

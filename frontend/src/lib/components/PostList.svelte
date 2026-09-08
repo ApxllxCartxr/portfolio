@@ -1,13 +1,18 @@
 <!--
-	Writing index. Same content-left / meta-right grid the resume uses, so
-	the three blocks on the homepage (signature, resume, writing) speak the
-	same dialect.
+	Writing index — the /blog page. Set as an editorial running index rather
+	than a narrow list: each entry carries a folio ordinal, the title in the
+	display face at reading size, and the excerpt beneath it, with the date
+	as mono fine print on the right. Numbered rows make the list skimmable —
+	you can read just the ordinals and titles in a sweep, then drop into an
+	excerpt where one snags.
+
+	The title's underline is the only motion: it strokes in from the left on
+	hover, the one action the page offers, so nothing else competes with it.
 
 	Failure modes collapse to the same one-liner as an empty list — a live
 	error banner on a portfolio is louder than the page around it, so
 	"unavailable" and "empty" both render as an honest "writing coming soon"
-	and the section quietly waits. The blog list page renders its own
-	states; this is just the homepage summary.
+	and the section quietly waits.
 -->
 <script lang="ts">
 	import { resolve } from '$app/paths';
@@ -16,8 +21,7 @@
 	interface Props {
 		posts: PostSummary[];
 		showAllLink?: boolean;
-		/** API didn't respond. On the homepage this folds into the empty-state
-		 *  line; on the /blog index it gets its own honest line so a reader
+		/** API didn't respond. Renders the explicit outage line so a reader
 		 *  who came for posts knows the page tried and is worth a retry. */
 		unavailable?: boolean;
 		/** Render the explicit outage line instead of collapsing to "coming soon". */
@@ -31,6 +35,8 @@
 			.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: '2-digit' })
 			.toUpperCase();
 	}
+
+	const number = (i: number) => String(i + 1).padStart(2, '0');
 </script>
 
 {#if unavailable || posts.length === 0}
@@ -40,20 +46,20 @@
 		<p class="empty">Writing coming soon.</p>
 	{/if}
 {:else}
-	<ul class="posts">
-		{#each posts as post (post.id)}
+	<ol class="index">
+		{#each posts as post, i (post.id)}
 			<li>
 				<a href={resolve('/blog/[slug]', { slug: post.slug })}>
-					<span class="date">
-						<time datetime={post.created_at}>{formatDate(post.created_at)}</time>
-					</span>
-					<span class="title">{post.title}</span>
-					<span class="arrow" aria-hidden="true">&rarr;</span>
-					{#if post.excerpt}<span class="excerpt">{post.excerpt}</span>{/if}
+					<span class="num" aria-hidden="true">{number(i)}</span>
+					<div class="body">
+						<h2>{post.title}</h2>
+						{#if post.excerpt}<p class="excerpt">{post.excerpt}</p>{/if}
+					</div>
+					<time datetime={post.created_at}>{formatDate(post.created_at)}</time>
 				</a>
 			</li>
 		{/each}
-	</ul>
+	</ol>
 
 	{#if showAllLink}
 		<a class="all" href={resolve('/blog')}>All posts &rarr;</a>
@@ -63,88 +69,109 @@
 <style>
 	.empty {
 		margin: 0;
-		font-family: var(--font-mono);
-		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
-		text-transform: uppercase;
+		font-size: 1.05rem;
 		color: var(--muted);
 	}
 
-	.posts {
+	.index {
 		margin: 0;
 		padding: 0;
 		list-style: none;
 		border-top: var(--rule) solid var(--line);
 	}
 
-	/* Date rail · title · arrow / excerpt. The excerpt takes the full
-	   width below the title on narrow screens, sits beside it on wider. */
-	.posts a {
+	.index li {
+		border-bottom: var(--rule) solid var(--line);
+	}
+
+	/* Number · title-and-excerpt · date. On desktop the date parks on the
+	   right at the title's baseline, so the eye has a fixed meta column to
+	   chase down while the titles step down the left. */
+	.index a {
 		display: grid;
 		grid-template-columns: auto minmax(0, 1fr) auto;
 		grid-template-areas:
-			'date title arrow'
-			'excerpt excerpt excerpt';
-		gap: 0.35rem 1.25rem;
+			'num body date'
+			'. excerpt date';
+		column-gap: clamp(1rem, 2.5vw, 2rem);
+		row-gap: 0.3rem;
 		align-items: baseline;
-		padding: 1rem 0;
-		border-bottom: var(--rule) solid var(--line);
+		padding: clamp(1rem, 2.5vh, 1.5rem) 0;
 		text-decoration: none;
 	}
 
-	@media (min-width: 700px) {
-		.posts a {
-			grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-		}
-	}
-
-	.date {
-		grid-area: date;
-	}
-
-	time {
+	.num {
+		grid-area: num;
 		font-family: var(--font-mono);
 		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
-		text-transform: uppercase;
-		color: var(--muted);
+		color: var(--accent);
 	}
 
-	.title {
-		grid-area: title;
-		font-size: 1.05rem;
-		font-weight: 600;
-		line-height: 1.3;
-		letter-spacing: -0.005em;
+	.body {
+		grid-area: body;
+		min-width: 0;
+	}
+
+	h2 {
+		margin: 0;
+		padding-bottom: 0.12em;
+		font-family: var(--font-display);
+		font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: -0.02em;
+		text-wrap: balance;
+		/* The animated underline: a gradient hairline that sweeps in from the
+		   left on hover. `background-position: left calc(100% - ...)` pins it
+		   to the bottom of the last line when the title wraps. */
+		background-image: linear-gradient(var(--accent), var(--accent));
+		background-repeat: no-repeat;
+		background-position: left calc(100% - 0.04em);
+		background-size: 0% 1px;
+		transition: background-size 300ms ease;
+	}
+
+	.index a:hover h2,
+	.index a:focus-visible h2 {
+		background-size: 100% 1px;
 	}
 
 	.excerpt {
 		grid-area: excerpt;
-		max-width: 62ch;
+		max-width: 60ch;
+		margin: 0;
 		font-size: 0.95rem;
+		line-height: 1.45;
+		color: var(--muted);
+		/* Two-line clamp keeps the list skimmable — long excerpts collapse
+		   to the same silhouette as short ones. */
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+		overflow: hidden;
+		line-clamp: 2;
+	}
+
+	time {
+		grid-area: date;
+		font-family: var(--font-mono);
+		font-size: var(--t-caption);
 		line-height: 1.5;
 		color: var(--muted);
+		white-space: nowrap;
+		transition: color 150ms ease;
 	}
 
-	.arrow {
-		grid-area: arrow;
-		color: var(--muted);
-		transition: transform 150ms ease;
-	}
-
-	.posts a:hover .arrow,
-	.posts a:focus-visible .arrow {
-		color: var(--fg);
-		transform: translateX(2px);
+	.index a:hover time,
+	.index a:focus-visible time {
+		color: var(--accent);
 	}
 
 	.all {
 		display: inline-block;
 		margin-top: 1.1rem;
-		font-family: var(--font-mono);
-		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
-		text-transform: uppercase;
+		font-size: 1rem;
+		font-weight: 600;
 		color: var(--muted);
 		text-decoration: underline;
 		text-underline-offset: 4px;
@@ -154,5 +181,20 @@
 	.all:hover,
 	.all:focus-visible {
 		color: var(--accent);
+	}
+
+	@media (max-width: 640px) {
+		.index a {
+			grid-template-areas:
+				'num body'
+				'. excerpt';
+			align-items: start;
+		}
+
+		/* The date drops out of the meta column and reads as a caption over
+		   the title on narrow screens. */
+		.index a time {
+			display: none;
+		}
 	}
 </style>

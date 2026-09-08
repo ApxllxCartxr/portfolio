@@ -53,11 +53,12 @@
 
 		<div class="bio">
 			<p>
-				I spend most of my time on backends and simulation. Right now that means
+				most of my time goes to backends and simulation — the parts of a system that are judged
+				under load. right now that means
 				<ProjectTicker {onOpenDemo} />
 			</p>
 			<p class="context">
-				pre-final year cse grad @cit chennai, ex-sde intern @ picabord tech., president @ edc-citil.
+				pre-final year cse at cit chennai · sde intern at picabord tech · president, edc-citil
 			</p>
 		</div>
 	</div>

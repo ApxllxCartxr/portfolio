@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import Seo from '$lib/components/Seo.svelte';
 	import { renderMarkdown } from '$lib/markdown';
 	import type { PageProps } from './$types';
 
@@ -7,9 +8,11 @@
 	let html = $derived(renderMarkdown(data.post.content));
 </script>
 
-<svelte:head>
-	<title>{data.post.title} · Joseph Fernando</title>
-</svelte:head>
+<Seo
+	title="{data.post.title} — Joseph Fernando"
+	description={data.post.excerpt || `${data.post.title} — writing by Joseph Fernando.`}
+	type="article"
+/>
 
 <main class="wrap">
 	<a class="back" href={resolve('/blog')}>&larr; All posts</a>
@@ -41,10 +44,8 @@
 	.back {
 		display: inline-block;
 		margin-bottom: 2rem;
-		font-family: var(--font-mono);
-		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
-		text-transform: uppercase;
+		font-size: 1rem;
+		font-weight: 500;
 		color: var(--muted);
 		text-decoration: underline;
 		text-underline-offset: 4px;
@@ -56,41 +57,50 @@
 		color: var(--accent);
 	}
 
+	/* The post title takes the display face, like every other title on the
+	   site — a post arrived at from the homepage should read as the same
+	   publication. */
 	h1 {
-		font-family: var(--font-title);
-		font-size: var(--t-h1);
-		font-weight: 600;
-		line-height: 1.15;
-		letter-spacing: -0.005em;
-		margin: 0 0 0.6rem;
+		font-family: var(--font-display);
+		font-size: clamp(2.1rem, 4.5vw, 3rem);
+		font-weight: 700;
+		line-height: 1.03;
+		letter-spacing: -0.025em;
+		margin: 0 0 0.7rem;
 		text-wrap: balance;
 	}
 
 	time {
 		display: block;
 		margin-bottom: 2.5rem;
-		font-family: var(--font-mono);
-		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
-		text-transform: uppercase;
+		font-size: 1rem;
+		font-weight: 500;
 		color: var(--muted);
 	}
 
 	.content {
 		max-width: var(--measure);
 		font-family: var(--font-body);
-		font-size: var(--t-body);
-		line-height: 1.65;
+		font-size: 1.05rem;
+		line-height: 1.7;
 		border-top: var(--rule) solid var(--line);
 		padding-top: 2rem;
 	}
 
-	.content :global(h1),
 	.content :global(h2),
 	.content :global(h3) {
-		font-family: var(--font-title);
-		font-weight: 600;
-		margin: 2rem 0 1rem;
+		font-family: var(--font-display);
+		font-weight: 700;
+		letter-spacing: -0.015em;
+		margin: 2.25rem 0 0.9rem;
+	}
+
+	.content :global(h2) {
+		font-size: 1.6rem;
+	}
+
+	.content :global(h3) {
+		font-size: 1.3rem;
 	}
 
 	.content :global(p) {

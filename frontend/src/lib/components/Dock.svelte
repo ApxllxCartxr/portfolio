@@ -1,8 +1,8 @@
 <!--
-	macOS-style dock of contact links: fixed to the bottom-center of the
-	viewport from page load, flat icon tiles (no gloss, no brand-color
-	background — just the glyph) that magnify toward the cursor the way the
-	real macOS Dock does.
+	Contact rail, fixed to the bottom-centre of the viewport. The
+	magnification is macOS-style and so is the pill, but the chrome is not:
+	a single hairline over flat paper — no backdrop blur, no gloss, no brand
+	colours, monochrome glyphs.
 
 	Architecture notes (why it's built this way):
 	- Each `.tile` (the <a>, the actual hit target) stays a fixed size, so the
@@ -24,10 +24,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
+	// Hidden once the footer is on screen — the footer carries the same links
+	// at full size, so the floating copy of them is just in the way there.
+	let { hidden = false }: { hidden?: boolean } = $props();
+
 	interface Item {
 		label: string;
 		href: string;
-		fg: string;
 		path: string;
 	}
 
@@ -35,25 +38,21 @@
 		{
 			label: 'Email',
 			href: 'mailto:josephfernando05@proton.me',
-			fg: '#6d4aff',
 			path: 'm15.24 8.998 3.656-3.073v15.81H2.482C1.11 21.735 0 20.609 0 19.223V6.944l7.58 6.38a2.186 2.186 0 0 0 2.871-.042l4.792-4.284h-.003zm-5.456 3.538 1.809-1.616a2.438 2.438 0 0 1-1.178-.533L.905 2.395A.552.552 0 0 0 0 2.826v2.811l8.226 6.923a1.186 1.186 0 0 0 1.558-.024zM23.871 2.463a.551.551 0 0 0-.776-.068l-3.199 2.688v16.653h1.623c1.371 0 2.481-1.127 2.481-2.513V2.824a.551.551 0 0 0-.129-.36z'
 		},
 		{
 			label: 'GitHub',
 			href: 'https://github.com/apxllxcartxr',
-			fg: '#181717',
 			path: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'
 		},
 		{
 			label: 'LinkedIn',
 			href: 'https://www.linkedin.com/in/joseph-fernando05/',
-			fg: '#0a66c2',
 			path: 'M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z'
 		},
 		{
 			label: 'LeetCode',
 			href: 'https://leetcode.com/u/apxllxcartxr/',
-			fg: '#ffa116',
 			path: 'M13.483 0a1.374 1.374 0 0 0-.961.438L7.116 6.226l-3.854 4.126a5.266 5.266 0 0 0-1.209 2.104 5.35 5.35 0 0 0-.125.513 5.527 5.527 0 0 0 .062 2.362 5.83 5.83 0 0 0 .349 1.017 5.938 5.938 0 0 0 1.271 1.818l4.277 4.193.039.038c2.248 2.165 5.852 2.133 8.063-.074l2.396-2.392c.54-.54.54-1.414.003-1.955a1.378 1.378 0 0 0-1.951-.003l-2.396 2.392a3.021 3.021 0 0 1-4.205.038l-.02-.019-4.276-4.193c-.652-.64-.972-1.469-.948-2.263a2.68 2.68 0 0 1 .066-.523 2.545 2.545 0 0 1 .619-1.164L9.13 8.114c1.058-1.134 3.204-1.27 4.43-.278l3.501 2.831c.593.48 1.461.387 1.94-.207a1.384 1.384 0 0 0-.207-1.943l-3.5-2.831c-.8-.647-1.766-1.045-2.774-1.202l2.015-2.158A1.384 1.384 0 0 0 13.483 0zm-2.866 12.815a1.38 1.38 0 0 0-1.38 1.382 1.38 1.38 0 0 0 1.38 1.382H20.79a1.38 1.38 0 0 0 1.38-1.382 1.38 1.38 0 0 0-1.38-1.382z'
 		}
 	];
@@ -224,8 +223,11 @@
 
 <nav
 	class="dock"
+	class:hidden
 	bind:this={dockEl}
 	aria-label="Contact"
+	aria-hidden={hidden}
+	inert={hidden}
 	onpointermove={handlePointerMove}
 	onpointerleave={handlePointerLeave}
 >
@@ -236,7 +238,6 @@
 			target={item.href.startsWith('mailto:') ? undefined : '_blank'}
 			rel={item.href.startsWith('mailto:') ? undefined : 'noreferrer'}
 			class="tile"
-			style="--fg: {item.fg}"
 			aria-label={item.label}
 			onpointerenter={(event) => handleTilePointerEnter(i, event)}
 			onpointerleave={() => {
@@ -263,7 +264,7 @@
 
 <style>
 	.dock {
-		--tile-size: 2.38rem;
+		--tile-size: 2.1rem;
 
 		position: fixed;
 		bottom: clamp(1.25rem, 4vh, 2.5rem);
@@ -271,20 +272,31 @@
 		z-index: 40;
 		display: flex;
 		align-items: flex-end;
-		gap: 0.6rem;
+		gap: clamp(0.85rem, 2.2vw, 1.5rem);
 		margin: 0;
-		padding-block: 0.53rem;
-		padding-inline: calc(0.77rem + var(--dock-spread, 0px));
+		padding-block: 0.7rem;
+		padding-inline: calc(1.1rem + var(--dock-spread, 0px));
 		list-style: none;
+		/* A pill, but a quiet one: one hairline and flat paper instead of the
+		   OS treatment — no blur, no gloss — with a shadow soft enough to
+		   read as paper above paper. */
 		border: var(--rule) solid var(--line);
-		border-radius: 1.12rem;
-		background: color-mix(in srgb, var(--bg-raised) 78%, transparent);
-		backdrop-filter: blur(14px) saturate(160%);
-		-webkit-backdrop-filter: blur(14px) saturate(160%);
-		box-shadow:
-			inset 0 1px 0 color-mix(in srgb, white 10%, transparent),
-			0 10px 26px -14px color-mix(in srgb, var(--fg) 40%, transparent);
+		border-radius: 999px;
+		background: var(--bg-raised);
+		box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--fg) 55%, transparent);
 		transform: translateX(-50%);
+		transition:
+			opacity 260ms ease,
+			transform 260ms ease,
+			visibility 0s linear 0s;
+	}
+
+	.dock.hidden {
+		opacity: 0;
+		visibility: hidden;
+		transform: translateX(-50%) translateY(140%);
+		pointer-events: none;
+		transition-delay: 0s, 0s, 260ms;
 	}
 
 	/* Fixed-size hit target — this is what keeps the flex row from ever
@@ -297,6 +309,14 @@
 		width: var(--tile-size);
 		height: var(--tile-size);
 		flex-shrink: 0;
+		/* Monochrome — the glyphs are set in the page's ink, not in four
+		   competing brand colours. */
+		color: var(--muted);
+		transition: color 160ms ease;
+	}
+
+	.tile:hover,
+	.tile:focus-visible {
 		color: var(--fg);
 	}
 
@@ -333,19 +353,18 @@
 		fill: currentColor;
 	}
 
+	/* The label is set as type, not as a chip: no box, no border, no fill —
+	   the page's serif in italic, the way a caption sits under a plate. */
 	.tooltip {
 		position: absolute;
-		bottom: calc(100% + 0.6rem + var(--lift, 0px));
+		bottom: calc(100% + 0.55rem + var(--lift, 0px));
 		left: 50%;
 		transform: translate(-50%, 4px);
-		padding: 0.3rem 0.6rem;
-		border: var(--rule) solid var(--line);
-		border-radius: 0.5rem;
-		background: var(--bg-raised);
+		font-family: var(--font-serif);
+		font-style: italic;
+		font-size: 0.95rem;
+		line-height: 1;
 		color: var(--fg);
-		font-family: var(--font-mono);
-		font-size: var(--t-caption);
-		letter-spacing: var(--t-track);
 		white-space: nowrap;
 		pointer-events: none;
 		opacity: 0;
@@ -378,10 +397,10 @@
 
 	@media (max-width: 560px) {
 		.dock {
-			--tile-size: 1.82rem;
-			gap: 0.42rem;
-			padding-block: 0.42rem;
-			padding-inline: calc(0.6rem + var(--dock-spread, 0px));
+			--tile-size: 1.6rem;
+			gap: clamp(0.7rem, 4vw, 1.1rem);
+			padding-block: 0.55rem;
+			padding-inline: calc(0.85rem + var(--dock-spread, 0px));
 		}
 	}
 </style>

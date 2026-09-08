@@ -29,24 +29,24 @@
 		{
 			id: 'openstore',
 			name: 'OpenStore',
-			blurb: 'an AI sales channel merchants switch on in three commands',
+			blurb: 'an ai sales channel a merchant switches on in three commands',
 			href: 'https://github.com/ApxllxCartxr/OpenStore'
 		},
 		{
 			id: 'cmrlsim',
 			name: 'cmrlsim',
-			blurb: "a discrete-event model of Chennai's metro network, in Go"
+			blurb: "chennai's metro network as a discrete-event model, in go"
 		},
 		{
 			id: 'simhalink',
 			name: 'SimhaLink',
-			blurb: 'real-time crowd safety for one of the largest gatherings',
+			blurb: 'crowd safety in real time, at the scale of a pilgrimage',
 			href: 'https://github.com/ApxllxCartxr/SimhaLink'
 		},
 		{
 			id: 'facet',
 			name: 'Facet',
-			blurb: 'AML triage that flags anomalies before an analyst reviews',
+			blurb: 'aml triage where the model explains and the rules decide',
 			href: 'https://github.com/ApxllxCartxr/Facet'
 		}
 	];
@@ -204,6 +204,9 @@
 		overflow: hidden;
 		clip-path: inset(50%);
 		white-space: nowrap;
+		/* Hidden to the eye but still selectable — without this, copying the
+		   bio drags the whole project list along with it. */
+		user-select: none;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

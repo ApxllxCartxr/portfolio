@@ -160,19 +160,35 @@
 	--t-display: clamp(3.25rem, 9vw, 6rem); /* hero name */
 	--t-h1: clamp(1.85rem, 3.5vw, 2.6rem); /* section title (job role) */
 	--t-h2: 0.72rem; /* small mono badge: the "live" status dot */
-	--t-section: clamp(1rem, 1.4vw, 1.15rem); /* rail title: Experience, Projects, Skills, Writing */
+	--t-section: clamp(1.6rem, 2.8vw, 2.2rem); /* section titles: Work, Experience, Stack, Writing */
 	--t-body: 1rem;
-	--t-caption: 0.75rem;
-	--t-track: 0.14em;
+	/* Caption is metadata, not fine print. It used to sit at 0.75rem tracked
+	   mono, which turned every label on the page into something you had to
+	   lean in for — nothing here reads below this size any more. */
+	--t-caption: 0.95rem;
+	--t-track: 0.06em;
+
+	--t-label-ordinal: clamp(1.5rem, 3vw, 2.4rem); /* wall-label ordinal */
 
 	--measure: 64ch;
 	--col-label: 8.5rem;
+
+	/* Clearance for anything sticky: the shell, plus the nav pill parked
+	   against it. */
+	--sticky-top: 5.25rem;
+
+	/* The ink shell framing the viewport (Shell.svelte). */
+	--shell-w: 0.55rem;
+	--shell-radius: 1.1rem;
 
 	--radius: 6px;
 	--radius-lg: 10px;
 	--rule: 1px;
 
 	--focus-ring: var(--fg);
+	/* Section glyphs printed at plate scale sit behind type — they are the
+	   same hairline as every rule on the page, never the accent. */
+	--plate: var(--line);
 }
 
 /* Derived tokens — always in terms of the palette, never a literal colour. */
@@ -188,6 +204,13 @@ html {
 	line-height: 1.55;
 	-webkit-font-smoothing: antialiased;
 	text-rendering: optimizeLegibility;
+	/* Hide the native document scrollbar — the page is a bordered "ink shell"
+	   frame, and a browser chrome bar would break the matte-edge illusion. */
+	scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+	display: none;
 }
 
 body {
@@ -222,6 +245,26 @@ a {
 	color: inherit;
 }
 
+/* ============================================================
+   SECTION SHELL — every section below the hero is a two-track
+   layout: the head sits in a narrow rail on the left and stays
+   put while the content scrolls past it. Below 1000px there is
+   no room for two tracks, so the head goes back to sitting on
+   top of its content.
+   ============================================================ */
+.sec {
+	display: grid;
+	row-gap: 1.25rem;
+}
+
+@media (min-width: 1000px) {
+	.sec {
+		grid-template-columns: 11rem minmax(0, 1fr);
+		column-gap: clamp(1.5rem, 3vw, 3rem);
+		row-gap: 0;
+	}
+}
+
 /* A thin vertical rail at the column gutter — gives the spine something
    to do on wide screens. The hairline is the same --line used everywhere
    else, so the page stays one material. */
@@ -238,6 +281,19 @@ a {
 		bottom: 0.4em;
 		width: var(--rule);
 		background: var(--line);
+	}
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation-duration: 0.45s;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation: none;
 	}
 }
 
