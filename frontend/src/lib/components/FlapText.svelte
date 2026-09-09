@@ -11,6 +11,9 @@
 	letters happen to sit late in the alphabet. Bounded, and it reads the same
 	every time.
 
+	A cell only turns when its own character changes, so retargeting the word
+	does not disturb the cells that already read correctly.
+
 	Accessibility: the cells are decoration — the text is exposed once, in a
 	clipped span, so a screen reader gets "GITHUB" and not "G I T H U B" mid-
 	flip. Under reduced motion the cells are simply already landed.
@@ -91,7 +94,21 @@
 		current = goal.map((_, i) => current[i] ?? ' ');
 		shown = current.slice();
 
+		// Only the cells whose target actually moved get turned. A real board
+		// works this way — the clock's seconds flap while the hour sits
+		// still — and it is also the cheap path: the station clock retargets
+		// every second, and without this all eight cells re-spun for a digit
+		// that had not changed.
+		//
+		// `ord` counts the turning cells, not their position in the word, so
+		// the stagger stays tight when the changed cells are late in the run.
+		// Keyed off i, a lone seconds cell at index 7 would sit through
+		// 7 x stagger of dead time before starting.
+		let ord = 0;
+
 		goal.forEach((char, i) => {
+			if (current[i] === char) return;
+
 			const to = CHARSET.indexOf(char);
 			// 8–13 steps, varied per cell so the column doesn't tick in unison.
 			const spin = 8 + ((i * 3) % 6);
@@ -99,9 +116,11 @@
 
 			for (let s = 0; s <= spin; s++) {
 				timers.push(
-					setTimeout(() => set(i, CHARSET[(from + s) % CHARSET.length]), i * stagger + s * step)
+					setTimeout(() => set(i, CHARSET[(from + s) % CHARSET.length]), ord * stagger + s * step)
 				);
 			}
+
+			ord += 1;
 		});
 	});
 

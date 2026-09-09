@@ -8,6 +8,7 @@
 
 <svelte:head>
 	<title>Manage posts · Joseph Fernando</title>
+	<meta name="robots" content="noindex, nofollow" />
 </svelte:head>
 
 <main class="wrap">
@@ -46,11 +47,19 @@
 </main>
 
 <style>
+	/* A ground for the copy: the ASCII field runs behind every admin route
+	   and body text can't sit straight on it, so each page is a hairline
+	   panel in the same material as the login card. */
 	.wrap {
+		position: relative;
 		width: 100%;
 		max-width: 720px;
-		margin-inline: auto;
-		padding: clamp(2rem, 6vh, 3rem) clamp(1.25rem, 5vw, 2rem) 5rem;
+		margin: clamp(1.5rem, 5vh, 3rem) auto clamp(3rem, 8vh, 5rem);
+		padding: clamp(1.75rem, 5vh, 2.5rem) clamp(1.25rem, 5vw, 2rem) 2.5rem;
+		border: var(--rule) solid var(--line);
+		border-radius: var(--radius-lg);
+		background: color-mix(in srgb, var(--bg-raised) 90%, transparent);
+		backdrop-filter: blur(4px);
 		color: var(--fg);
 	}
 

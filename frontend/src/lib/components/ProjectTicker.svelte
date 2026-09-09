@@ -16,8 +16,6 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 
-	let { onOpenDemo }: { onOpenDemo?: () => void } = $props();
-
 	type Project = {
 		id: 'openstore' | 'cmrlsim' | 'simhalink' | 'facet';
 		name: string;
@@ -35,7 +33,8 @@
 		{
 			id: 'cmrlsim',
 			name: 'cmrlsim',
-			blurb: "chennai's metro network as a discrete-event model, in go"
+			blurb: "chennai's metro network as a discrete-event model, in go",
+			href: 'https://github.com/ApxllxCartxr/cmrlsim'
 		},
 		{
 			id: 'simhalink',
@@ -126,22 +125,15 @@
 	onmouseleave={() => (paused = false)}
 	onfocusin={() => (paused = true)}
 	onfocusout={() => (paused = false)}
-	>{@render icon(current.id)}{#if current.href}<a
-			class="name"
-			href={current.href}
-			rel="noreferrer"
-			tabindex="-1">{current.name}</a
-		>{:else}<button class="name" type="button" tabindex="-1" onclick={() => onOpenDemo?.()}
-			>{current.name}</button
-		>{/if} — {current.blurb}</span
+	>{@render icon(current.id)}<a class="name" href={current.href} rel="noreferrer" tabindex="-1"
+		>{current.name}</a
+	>
+	— {current.blurb}</span
 >
 
 <span class="clipped">
 	{#each projects as project, i (project.id)}
-		{#if project.href}<a href={project.href} rel="noreferrer">{project.name}</a>{:else}<button
-				type="button"
-				onclick={() => onOpenDemo?.()}>{project.name}</button
-			>{/if}
+		<a href={project.href} rel="noreferrer">{project.name}</a>
 		— {project.blurb}{i < projects.length - 1 ? '; ' : '.'}
 	{/each}
 </span>
@@ -188,11 +180,6 @@
 		text-decoration: underline;
 		text-decoration-thickness: 1px;
 		text-underline-offset: 3px;
-		/* the button entry has to sit on the same baseline as the anchors */
-		padding: 0;
-		border: 0;
-		background: none;
-		cursor: pointer;
 	}
 
 	.clipped {

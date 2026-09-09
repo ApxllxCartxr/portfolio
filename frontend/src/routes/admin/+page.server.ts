@@ -1,7 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 import { resolve } from '$app/paths';
-import { isAdminSession, setAdminSession } from '$lib/server/admin-auth';
+import { isAdminSession, setAdminSession, verifyAdminPassword } from '$lib/server/admin-auth';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -13,9 +12,8 @@ export const load: PageServerLoad = async ({ cookies }) => {
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const form = await request.formData();
-		const password = form.get('password');
 
-		if (typeof password !== 'string' || password !== env.BLOG_API_KEY) {
+		if (!verifyAdminPassword(form.get('password'))) {
 			return fail(401, { error: 'Incorrect password' });
 		}
 

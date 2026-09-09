@@ -47,7 +47,9 @@ func (s *PostStore) List(ctx context.Context, includeDrafts bool) ([]PostSummary
 	if !includeDrafts {
 		query += ` WHERE published = TRUE`
 	}
-	query += ` ORDER BY created_at DESC`
+	// Bound the scan: the blog index and homepage only ever need the head of
+	// the list, and an unbounded SELECT gets slower with every post.
+	query += ` ORDER BY created_at DESC LIMIT 100`
 
 	rows, err := s.db.QueryContext(ctx, query)
 	if err != nil {

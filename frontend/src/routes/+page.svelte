@@ -22,18 +22,12 @@
 	import ExperienceRecord from '$lib/components/ExperienceRecord.svelte';
 	import StackSpecimen from '$lib/components/StackSpecimen.svelte';
 	import WritingLead from '$lib/components/WritingLead.svelte';
-	import CmrlsimDemo from '$lib/components/CmrlsimDemo.svelte';
-	import DemoWindow from '$lib/components/DemoWindow.svelte';
 	import Dock from '$lib/components/Dock.svelte';
 	import Seo from '$lib/components/Seo.svelte';
 	import { workLabels } from '$lib/resume-data';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-
-	// One window for the whole page. The hero ticker and the cmrlsim wall
-	// label open the same demo, so the open state lives here.
-	let cmrlsimOpen = $state(false);
 
 	$effect(() => {
 		if (!browser) return;
@@ -134,7 +128,7 @@
 	<section class="hero section">
 		<MapPlate />
 		<div class="hero-copy">
-			<CenterCard onOpenDemo={() => (cmrlsimOpen = true)} />
+			<CenterCard />
 		</div>
 	</section>
 
@@ -158,12 +152,6 @@
 		</div>
 	</div>
 </main>
-
-{#if cmrlsimOpen}
-	<DemoWindow title="cmrlsim" onClose={() => (cmrlsimOpen = false)}>
-		<CmrlsimDemo />
-	</DemoWindow>
-{/if}
 
 <Dock hidden={dockHidden} />
 

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"fmt"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -22,6 +23,11 @@ func openDB(ctx context.Context, databaseURL string) (*sql.DB, error) {
 		db.Close()
 		return nil, fmt.Errorf("pinging db: %w", err)
 	}
+
+	// Free-tier Postgres caps connections — keep the pool small and recycle.
+	db.SetMaxOpenConns(5)
+	db.SetMaxIdleConns(2)
+	db.SetConnMaxLifetime(5 * time.Minute)
 
 	if _, err := db.ExecContext(ctx, schemaSQL); err != nil {
 		db.Close()

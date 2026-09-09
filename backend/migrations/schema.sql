@@ -10,3 +10,4 @@ CREATE TABLE IF NOT EXISTS posts (
 );
 
 CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_published_created_at ON posts (created_at DESC) WHERE published = TRUE;

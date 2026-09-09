@@ -524,12 +524,10 @@
 		background: var(--bg-sunken);
 	}
 
-	/* Selected object on a plan: it settles into the surface a shade and
-	   takes an accent edge. No inversion — the ink is spent elsewhere on the
-	   page, and a block that size flipping black swallows the grid. */
+	/* A block under the pointer takes an accent edge — border only, no
+	   surface tint. */
 	.block:hover,
 	.block:focus-visible {
-		background: var(--bg-sunken);
 		border-color: var(--accent);
 	}
 

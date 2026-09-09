@@ -15,8 +15,6 @@
 -->
 <script lang="ts">
 	import ProjectTicker from '$lib/components/ProjectTicker.svelte';
-
-	let { onOpenDemo }: { onOpenDemo?: () => void } = $props();
 </script>
 
 <div class="layout">
@@ -55,7 +53,7 @@
 			<p>
 				most of my time goes to backends and simulation — the parts of a system that are judged
 				under load. right now that means
-				<ProjectTicker {onOpenDemo} />
+				<ProjectTicker />
 			</p>
 			<p class="context">
 				pre-final year cse at cit chennai · sde intern at picabord tech · president, edc-citil

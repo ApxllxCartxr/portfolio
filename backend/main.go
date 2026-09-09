@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 )
 
 // CORS is intentionally not implemented: every call to this API comes from
@@ -41,7 +42,14 @@ func main() {
 	mux := newMux(store, cfg.apiKey)
 
 	log.Printf("listening on :%s", cfg.port)
-	if err := http.ListenAndServe(":"+cfg.port, logRequests(mux)); err != nil {
+	srv := &http.Server{
+		Addr:         ":" + cfg.port,
+		Handler:      logRequests(mux),
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }

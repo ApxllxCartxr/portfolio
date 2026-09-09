@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import Seo from '$lib/components/Seo.svelte';
-	import { renderMarkdown } from '$lib/markdown';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-	let html = $derived(renderMarkdown(data.post.content));
 </script>
 
 <Seo
@@ -27,8 +25,8 @@
 	>
 
 	<div class="content">
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -- html is DOMPurify-sanitized in renderMarkdown() -->
-		{@html html}
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -- html is xss-sanitized in renderMarkdown() on the server -->
+		{@html data.html}
 	</div>
 </main>
 

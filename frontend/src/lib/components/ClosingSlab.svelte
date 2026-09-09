@@ -91,6 +91,7 @@
 			timeZone: 'Asia/Kolkata',
 			hour: '2-digit',
 			minute: '2-digit',
+			second: '2-digit',
 			hour12: false
 		}).format(new Date());
 	}
@@ -108,7 +109,7 @@
 		void route;
 
 		readClock();
-		clockTimer = setInterval(readClock, 30_000);
+		clockTimer = setInterval(readClock, 1000);
 
 		clearInterval(cascade);
 		live = 0;
@@ -188,7 +189,7 @@
 		<div class="head">
 			<h2 id="contact">Contact</h2>
 			<p class="clock">
-				<FlapText text={clock || '  :  '} cells={5} />
+				<FlapText text={clock || '  :  :  '} cells={8} />
 				<span class="tz">IST · UTC+5:30</span>
 			</p>
 		</div>
@@ -261,12 +262,27 @@
 			</div>
 		</dl>
 	</div>
+
+	<!-- Press-sheet registration marks. The colophon calls this the back of
+	     the book; crop marks are what is actually printed in a sheet's
+	     corners, and they tie the slab to the page's plate-and-mark hand. -->
+	<div class="crop" aria-hidden="true">
+		<span></span><span></span><span></span>
+	</div>
+
+	<div class="admin-corner">
+		<a class="admin-mark" href={resolve('/admin')} aria-label="Admin login" title="Admin">*</a>
+	</div>
 </footer>
 
 <style>
 	.slab {
 		--pad-block: clamp(3.5rem, 9vh, 5.5rem);
 		--gap: clamp(2.25rem, 5vh, 3.25rem);
+		/* The page gutter, owned in one place. Both the centred column and the
+		   board box subtract exactly this, which is what puts the contact
+		   rule, the greeting and the colophon on the box's own edges. */
+		--gutter: clamp(1.25rem, 5vw, 2.5rem);
 
 		position: relative;
 		display: flex;
@@ -313,13 +329,13 @@
 	}
 
 	.inner {
+		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
 		gap: var(--gap);
-		width: 100%;
+		width: calc(100% - var(--gutter) * 2);
 		max-width: 1080px;
 		margin-inline: auto;
-		padding-inline: clamp(1.25rem, 5vw, 2.5rem);
 	}
 
 	/* Board header: what this board is, and the time at the station. */
@@ -363,7 +379,10 @@
 	.greeting {
 		margin: 0;
 		font-family: var(--font-mono);
-		font-size: clamp(2.6rem, 8vw, 5.25rem);
+		/* Was hero-scale (up to 5.25rem) and it outshouted the board it was
+		   introducing. At announcement size the eye lands on the rows first,
+		   which is the part that is actually useful. */
+		font-size: clamp(1.85rem, 4.6vw, 2.9rem);
 		font-weight: 700;
 		line-height: 1;
 		letter-spacing: 0.01em;
@@ -373,32 +392,64 @@
 	}
 
 	.compact .greeting {
-		font-size: clamp(1.7rem, 4.5vw, 2.6rem);
+		font-size: clamp(1.45rem, 3.4vw, 2rem);
 	}
 
-	/* The board breaks the column and runs the full width of the slab — the
-	   only element on the page that does, which is the point: everything else
-	   here is a caption to it. A boxed 46rem panel sitting inside a 1080
-	   column read as an orphan, because the footer then had two widths
-	   arguing. Edge to edge it has one, and the gate column lands where a
-	   board's does: at the far right of the wall.
-
-	   The chassis is a band, not a box — hairlines top and bottom, no radius,
-	   because it has no corners on screen to round. */
+	/* The board is a contained box on the slab — same measure as the
+	   column, not the full width of the page. The chassis carries the
+	   box (border, radius, wash); the rows inside it are just content. */
 	.chassis {
-		width: 100%;
+		position: relative;
+		box-sizing: border-box;
+		width: calc(100% - var(--gutter) * 2);
+		max-width: 1080px;
+		margin-inline: auto;
 		padding-block: 0.2rem 0.35rem;
-		border-block: var(--rule) solid color-mix(in srgb, currentColor 14%, transparent);
+		padding-inline: var(--gutter);
+		border: var(--rule) solid color-mix(in srgb, currentColor 22%, transparent);
+		border-radius: var(--radius-lg);
 		background: color-mix(in srgb, currentColor 5%, transparent);
 	}
 
-	/* The rows keep a sane measure inside the bleed: past ~1280 the leader
-	   stops being a board's leader and becomes a gap. */
+	/* Sprocket margin. The same punched-dot vocabulary as .leader below,
+	   turned vertical and run down both gutters of the chassis — the
+	   perforated edge of the printed schedule this board replaced. Drawn in
+	   currentColor so it inverts with the slab. */
+	.chassis::before,
+	.chassis::after {
+		content: '';
+		position: absolute;
+		top: 0.9rem;
+		bottom: 0.9rem;
+		width: 1px;
+		background-image: radial-gradient(circle, currentColor 0.5px, transparent 0.6px);
+		background-size: 1px 0.42rem;
+		background-repeat: repeat-y;
+		opacity: 0.28;
+		pointer-events: none;
+	}
+
+	.chassis::before {
+		left: calc(var(--gutter) * 0.42);
+	}
+
+	.chassis::after {
+		right: calc(var(--gutter) * 0.42);
+	}
+
+	/* Below the caption breakpoint the gutters are too tight to spare the
+	   rail without crowding the rows. */
+	@media (max-width: 640px) {
+		.chassis::before,
+		.chassis::after {
+			display: none;
+		}
+	}
+
+	/* The rows fill the box: the measure and gutters live on the chassis
+	   now, so the inner wrapper is only semantics. */
 	.rows {
 		width: 100%;
-		max-width: 1280px;
-		margin-inline: auto;
-		padding-inline: clamp(1.25rem, 5vw, 2.5rem);
 	}
 
 	.board {
@@ -534,45 +585,155 @@
 		}
 	}
 
-	/* The colophon: not part of the board, printed under it. */
+	/* The colophon: not part of the board, printed under it.
+
+	   Set as a ledger strip rather than label-beside-value. The old 2x2 grid
+	   put a four-font run next to a two-word one, so the columns never
+	   resolved and the right half floated. Stacking the label over its value
+	   makes every cell the same shape regardless of how long the value is,
+	   and the four columns then read as one row of the board's own captions. */
 	.colophon {
 		display: grid;
-		gap: 0.4rem 2.5rem;
+		grid-template-columns: 1fr 1fr;
+		gap: 1.4rem var(--gutter);
 		margin: 0;
 		padding-top: 1.25rem;
 		border-top: var(--rule) solid color-mix(in srgb, currentColor 30%, transparent);
 		font-family: var(--font-mono);
 		font-size: 0.86rem;
-		line-height: 1.65;
+		line-height: 1.55;
 		opacity: 0.72;
 	}
 
 	@media (min-width: 720px) {
 		.colophon {
-			grid-template-columns: 1fr 1fr;
+			grid-template-columns: repeat(4, 1fr);
+		}
+
+		/* Column rules only once the strip is a clean four-up — under that it
+		   wraps to 2x2 and the hairlines would land mid-strip. */
+		.colophon div + div {
+			padding-left: var(--gutter);
+			border-left: var(--rule) solid color-mix(in srgb, currentColor 18%, transparent);
 		}
 	}
 
 	.colophon div {
 		display: flex;
-		gap: 0.75rem;
+		flex-direction: column;
+		gap: 0.3rem;
+		min-width: 0;
 	}
 
 	dt {
-		flex: none;
-		min-width: 5rem;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
-		opacity: 0.6;
+		opacity: 0.55;
 	}
 
 	dd {
 		margin: 0;
+		/* The type line is the only long value; let it wrap inside its own
+		   column instead of setting the column's width. */
+		overflow-wrap: break-word;
+	}
+
+	/* Four corner crosses, inset rather than bled: the slab clips its own
+	   overflow for the concave top edge, so a mark on the true corner would
+	   be cut in half. Each is one span with two gradients — a horizontal arm
+	   and a vertical one — so there is no extra DOM per arm. */
+	.crop {
+		position: absolute;
+		inset: clamp(0.7rem, 2vw, 1.15rem);
+		pointer-events: none;
+	}
+
+	.crop span {
+		position: absolute;
+		width: 11px;
+		height: 11px;
+		opacity: 0.32;
+		background-image:
+			linear-gradient(currentColor, currentColor), linear-gradient(currentColor, currentColor);
+		background-repeat: no-repeat;
+		background-size:
+			11px 1px,
+			1px 11px;
+		background-position:
+			center center,
+			center center;
+	}
+
+	.crop span:nth-child(1) {
+		top: 0;
+		left: 0;
+	}
+
+	.crop span:nth-child(2) {
+		top: 0;
+		right: 0;
+	}
+
+	/* No bottom-left cross: that corner is the admin mark's. */
+	.crop span:nth-child(3) {
+		right: 0;
+		bottom: 0;
+	}
+
+	@media (max-width: 640px) {
+		.crop {
+			display: none;
+		}
+	}
+
+	/* Discreet owner entry to /admin: a mark pinned to the footer's
+	   bottom-left corner, at the viewport edge rather than in the centred
+	   column. Same voice as the asterisks elsewhere on the page — Garamond,
+	   accent, larger than body copy. (The file's contrast note about accent
+	   text applies to legibility-critical copy; this is a single large
+	   decorative glyph.) */
+	.admin-corner {
+		position: absolute;
+		left: clamp(0.75rem, 3vw, 1.5rem);
+		bottom: 0.45rem;
+	}
+
+	.admin-mark {
+		display: inline-block;
+		font-family: var(--font-display);
+		font-weight: 700;
+		font-size: 1.6rem;
+		line-height: 1;
+		color: var(--accent);
+		text-decoration: none;
+	}
+
+	.admin-mark:hover,
+	.admin-mark:focus-visible {
+		transform: scale(1.15);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
 		.row {
 			transition: none;
 		}
+	}
+
+	/* Tokyo Night: the slab itself is light, so the contained board goes
+	   dark — ink box on a light wall. Rows, leaders, captions, hovers and
+	   flap cells all derive from currentColor, so swapping the container's
+	   background/color inverts the whole board with nothing per-row. */
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .chassis {
+			background: var(--bg);
+			color: var(--fg);
+			border-color: color-mix(in srgb, var(--fg) 30%, transparent);
+		}
+	}
+
+	:global(:root[data-theme='dark']) .chassis {
+		background: var(--bg);
+		color: var(--fg);
+		border-color: color-mix(in srgb, var(--fg) 30%, transparent);
 	}
 </style>
