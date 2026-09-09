@@ -36,7 +36,7 @@
 
 **SKILLS** 
 
-• **Programming & Web Development**: Python, JavaScript (Node.js, Express.js, React.js), Next.js, Django, Flask,
+• **Programming & Web Development**: Python, JavaScript (Express.js), Next.js, FastAPI, Flask,
 
 MongoDB, SQLite, PostgreSQL, Flutter, Firebase, Go, AI Engineering, Prompt Engineering
 

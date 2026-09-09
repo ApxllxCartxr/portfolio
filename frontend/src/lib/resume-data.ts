@@ -167,10 +167,8 @@ export const skillGroups: SkillGroup[] = [
 	{
 		label: 'Frameworks & runtimes',
 		items: [
-			{ name: 'Node.js', weight: 0.7 },
 			{ name: 'Next.js', weight: 0.6 },
-			{ name: 'React.js', weight: 0.6 },
-			{ name: 'Django', weight: 0.5 },
+			{ name: 'FastAPI', weight: 0.5 },
 			{ name: 'Flutter', weight: 0.5 },
 			{ name: 'Express.js', weight: 0.4 },
 			{ name: 'Flask', weight: 0.3 }
