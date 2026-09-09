@@ -17,11 +17,18 @@ class BlogApiError extends Error {
 // failures and edge 404s are retried.
 const RETRY_DELAYS_MS = [250, 750];
 
+// Fail fast instead of holding a serverless function open: the Go API's
+// free-tier host can stall on cold start, and without a timeout the load
+// hangs until Vercel's function timeout. Timeouts ride the same retry path
+// as connection drops below.
+const REQUEST_TIMEOUT_MS = 8000;
+
 async function request<T>(path: string, init?: RequestInit, attempt = 0): Promise<T> {
 	let res: Response;
 	try {
 		res = await fetch(`${env.BLOG_API_BASE_URL}${path}`, {
 			...init,
+			signal: init?.signal ?? AbortSignal.timeout(REQUEST_TIMEOUT_MS),
 			headers: {
 				'Content-Type': 'application/json',
 				...init?.headers

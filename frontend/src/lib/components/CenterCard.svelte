@@ -65,6 +65,8 @@
 		<img
 			class="avatar"
 			src="/headshot.webp"
+			srcset="/headshot-480.webp 480w, /headshot.webp 880w"
+			sizes="(max-width: 899px) 220px, 460px"
 			alt="Portrait of Joseph Fernando"
 			width="880"
 			height="883"

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/subtle"
 	"log"
 	"net/http"
 	"strings"
@@ -10,7 +11,12 @@ import (
 func isAuthorized(r *http.Request, apiKey string) bool {
 	auth := r.Header.Get("Authorization")
 	token, ok := strings.CutPrefix(auth, "Bearer ")
-	return ok && token == apiKey
+	if !ok {
+		return false
+	}
+	// Constant-time compare so a wrong guess leaks nothing about the key
+	// through response timing.
+	return subtle.ConstantTimeCompare([]byte(token), []byte(apiKey)) == 1
 }
 
 // requireAuth rejects the request with 401 unless it carries a valid bearer token.

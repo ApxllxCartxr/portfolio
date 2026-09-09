@@ -1,11 +1,26 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 )
+
+// Cap admin write bodies: posts are text, and an unbounded decode lets a
+// single request balloon memory. Over-limit bodies fail the decode below
+// into the existing 400 path.
+const maxBodyBytes = 1 << 20 // 1 MiB
+
+// Bound every DB round-trip well under the server's 15s WriteTimeout so a
+// stalled Postgres can't pin handlers and exhaust the 5-conn pool.
+const queryTimeout = 5 * time.Second
+
+func queryContext(r *http.Request) (context.Context, context.CancelFunc) {
+	return context.WithTimeout(r.Context(), queryTimeout)
+}
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
@@ -25,8 +40,10 @@ func handleHealthz(w http.ResponseWriter, r *http.Request) {
 
 func handleListPosts(store *PostStore, apiKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := queryContext(r)
+		defer cancel()
 		includeDrafts := isAuthorized(r, apiKey)
-		posts, err := store.List(r.Context(), includeDrafts)
+		posts, err := store.List(ctx, includeDrafts)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "failed to list posts")
 			return
@@ -37,8 +54,10 @@ func handleListPosts(store *PostStore, apiKey string) http.HandlerFunc {
 
 func handleGetPostBySlug(store *PostStore, apiKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := queryContext(r)
+		defer cancel()
 		includeDrafts := isAuthorized(r, apiKey)
-		post, err := store.GetBySlug(r.Context(), r.PathValue("slug"), includeDrafts)
+		post, err := store.GetBySlug(ctx, r.PathValue("slug"), includeDrafts)
 		if errors.Is(err, errNotFound) {
 			writeError(w, http.StatusNotFound, "post not found")
 			return
@@ -58,7 +77,9 @@ func handleGetPostByID(store *PostStore) http.HandlerFunc {
 			writeError(w, http.StatusBadRequest, "invalid post id")
 			return
 		}
-		post, err := store.GetByID(r.Context(), id)
+		ctx, cancel := queryContext(r)
+		defer cancel()
+		post, err := store.GetByID(ctx, id)
 		if errors.Is(err, errNotFound) {
 			writeError(w, http.StatusNotFound, "post not found")
 			return
@@ -73,6 +94,7 @@ func handleGetPostByID(store *PostStore) http.HandlerFunc {
 
 func handleCreatePost(store *PostStore) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
 		var in PostInput
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 			writeError(w, http.StatusBadRequest, "invalid request body")
@@ -83,7 +105,9 @@ func handleCreatePost(store *PostStore) http.HandlerFunc {
 			return
 		}
 
-		post, err := store.Create(r.Context(), in)
+		ctx, cancel := queryContext(r)
+		defer cancel()
+		post, err := store.Create(ctx, in)
 		if errors.Is(err, errSlugConflict) {
 			writeError(w, http.StatusConflict, "a post with that slug already exists")
 			return
@@ -104,6 +128,7 @@ func handleUpdatePost(store *PostStore) http.HandlerFunc {
 			return
 		}
 
+		r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
 		var in PostInput
 		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 			writeError(w, http.StatusBadRequest, "invalid request body")
@@ -114,7 +139,9 @@ func handleUpdatePost(store *PostStore) http.HandlerFunc {
 			return
 		}
 
-		post, err := store.Update(r.Context(), id, in)
+		ctx, cancel := queryContext(r)
+		defer cancel()
+		post, err := store.Update(ctx, id, in)
 		if errors.Is(err, errNotFound) {
 			writeError(w, http.StatusNotFound, "post not found")
 			return
@@ -139,7 +166,9 @@ func handleDeletePost(store *PostStore) http.HandlerFunc {
 			return
 		}
 
-		if err := store.Delete(r.Context(), id); errors.Is(err, errNotFound) {
+		ctx, cancel := queryContext(r)
+		defer cancel()
+		if err := store.Delete(ctx, id); errors.Is(err, errNotFound) {
 			writeError(w, http.StatusNotFound, "post not found")
 			return
 		} else if err != nil {
